@@ -1,0 +1,49 @@
+<html>
+<head>
+  <title>Remora Tests</title>
+  <link rel="stylesheet" href="../libs/qunit-75dae0b/qunit.css" type="text/css" />
+  <script src="../libs/qunit-75dae0b/qunit.js"></script>
+  <script data-main="/" src="../libs/require-1.0.2/require.js"></script>
+  <script>
+    requirejs.config({
+      paths: {
+        "text": "libs/require-1.0.2/text",
+        "underscore": "libs/underscore-1.2.3",
+        "PEG": "libs/peg-0.6.2-amd",
+        "remora/parser": "remora/parser.debug"
+      }
+    });
+
+    require(["underscore"], function(_) {
+      window._ = _;
+    });
+
+    function log() {
+      var args = Array.prototype.slice.call(arguments);
+      var cur = QUnit.config.current? QUnit.config.current.testName : "<none>";
+      args.splice(0, 0, cur + ":");
+      console.log.apply(console, args);
+    }
+
+    function asyncFail(reason) {
+      return function() {
+        start();
+        log("asyncFail arguments:", arguments);
+        ok(false, reason || "asyncFail (see console.log)");
+      }
+    }
+  </script>
+
+  <script src="test_rendering.js"></script>
+  <script src="test_parser.js"></script>
+</head>
+
+<body>
+  <h1 id="qunit-header">jquery-wakeful tests</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+</body>
+</head>
+</html>
