@@ -64,8 +64,7 @@ function(common, parser, _) {
         body: {
           type: "doc",
           children: ["  stuff!\n"]
-        },
-        rest: []
+        }
       }],
     ]]
 
