@@ -81,8 +81,6 @@
   var block_stack = [];
   var cur_block = null;
 
-  var line_start = true;
-
   if (input.length > 0 && input[input.length - 1] != "\n") {
     cur_doc.added_nl = true;
     input += "\n";
@@ -99,7 +97,6 @@ _doc
 = v:(markup / nl / .) {
   if (v !== undefined)
     cur_doc.children.push(v);
-  console.log("push:", v);
   return cur_doc;
 }
 
@@ -132,7 +129,10 @@ filter
 
 
 block_part
-= &{ return line_start; } _* "%" _? b:_block_part {
+= line_start line:(_*) "%%" {
+  return line.join("") + "%";
+}
+/ line_start _* "%" _? b:_block_part {
   return b;
 }
 
@@ -151,7 +151,6 @@ _block_part
 
 _block_start
 = block:_block_start_body _ e:([^:]+) ":" nl {
-  line_start = true;
   block.type = "controlblock";
   block.expr = e.join("");
   block.body = new_doc();
@@ -200,8 +199,12 @@ _
   return text;
 }
 
+line_start
+= &{
+  return input[pos-1] == "\n" || pos == 0;
+}
+
 nl
 = text:(_* "\n") {
-  line_start = true;
   return text.join("");
 }

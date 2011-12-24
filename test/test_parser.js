@@ -52,6 +52,12 @@ function(common, parser, _) {
       }]
     ]],
 
+    ["escaping %s", [
+      "%% foo %\n"+
+      "bar %",
+      ["% foo %\nbar %"]
+    ]],
+
     ["for loop", [
       "% for foo in bar:\n" +
       "  stuff!\n" +
@@ -64,6 +70,34 @@ function(common, parser, _) {
         body: {
           type: "doc",
           children: ["  stuff!\n"]
+        }
+      }]
+    ]],
+
+    ["nested for if loop", [
+      "% if foo:\n" +
+      "  % for bar in baz:\n" +
+      "    stuff!\n" +
+      "  % endfor\n" +
+      "% endif",
+      [{
+        type: "controlblock",
+        keyword: "if",
+        expr: "foo",
+        body: {
+          type: "doc",
+          children: [
+            {
+              type: "controlblock",
+              keyword: "for",
+              vars: ["bar"],
+              expr: "baz",
+              body: {
+                type: "doc",
+                children: ["    stuff!\n"]
+              }
+            }
+          ]
         }
       }],
     ]]
