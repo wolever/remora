@@ -171,11 +171,11 @@ function(remora, parser, _) {
 
   module("rendering");
   _.each(testcases, function(testcase) {
-    var template = remora.Template(testcase.input);
     _.each(testcase.expected_renders || [], function(expected_render) {
       var rname = expected_render.__name;
       var name = testcase.name + (rname? " - " + rname : "");
       test(name, function() {
+        var template = remora.Template(testcase.input);
         var actual = template.render(expected_render);
         equal(actual, expected_render.__expected);
       });

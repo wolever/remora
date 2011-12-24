@@ -23,10 +23,8 @@ function() {
 
     self.walk = function(node, result) {
       var handler = self["walk_" + node.type];
-      if (!handler) {
-        self.invalid_node = node;
-        throw Error("invalid node type: " + node.type);
-      }
+      if (!handler)
+        throw Error("unknown node type: " + node.type);
 
       handler(node, result);
     };
