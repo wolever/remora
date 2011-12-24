@@ -4,8 +4,10 @@
   <link rel="stylesheet" href="../libs/qunit-75dae0b/qunit.css" type="text/css" />
   <script src="../libs/qunit-75dae0b/qunit.js"></script>
   <script data-main="/" src="../libs/require-1.0.2/require.js"></script>
+
   <script>
     requirejs.config({
+      urlArgs: "?_cachebuster=" + (+new Date()),
       paths: {
         "text": "libs/require-1.0.2/text",
         "underscore": "libs/underscore-1.2.3",

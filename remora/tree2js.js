@@ -61,17 +61,28 @@ function() {
     };
 
     self.walk_controlblock = function(node, result) {
+      var end_block = "}\n";
       if (node.keyword == "for") {
         var args = node.vars.join(", ");
         result.push("__foreach(" + node.expr + ", function(" + args + ") {\n");
-        self.walk(node.body, result);
-        result.push("});\n")
+        end_block = "});\n";
       } else if (node.keyword == "if" || node.keyword == "while") {
         result.push(node.keyword + " (" + node.expr + ") {\n");
-        self.walk(node.body, result);
-        result.push("}\n");
+      } else if (node.keyword == "elif") {
+        result.push("else if (" + node.expr + ") {\n");
+      } else if (node.keyword == "else") {
+        result.push(" else {\n");
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
+      }
+
+      self.walk(node.body, result);
+      result.push(end_block);
+
+      var sub_blocks = node.sub_blocks || [];
+      for (var i = 0; i < sub_blocks.length; i += 1) {
+        var sub_block = sub_blocks[i];
+        self.walk(sub_block, result);
       }
     };
 
