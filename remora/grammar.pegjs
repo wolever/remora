@@ -1,4 +1,44 @@
 {
+  function computeCurrentPos() {
+    /*
+     * The first idea was to use |String.split| to break the input up to the
+     * error position along newlines and derive the line and column from
+     * there. However IE's |split| implementation is so broken that it was
+     * enough to prevent it.
+     */
+    
+    var line = 1;
+    var column = 1;
+    var seenCR = false;
+    
+    for (var i = 0; i < pos; i++) {
+      var ch = input.charAt(i);
+      if (ch === '\n') {
+        if (!seenCR) { line++; }
+        column = 1;
+        seenCR = false;
+      } else if (ch === '\r' | ch === '\u2028' || ch === '\u2029') {
+        line++;
+        column = 1;
+        seenCR = true;
+      } else {
+        column++;
+        seenCR = false;
+      }
+    }
+    
+    return { line: line, column: column, pos: pos };
+  }
+
+  function ParseError(message) {
+    this.pos = computeCurrentPos();
+    this.msg = message;
+    this.message = this.toString();
+  }
+
+  ParseError.prototype.toString = function() {
+    return "ParseError at " + this.pos.line + ":" + this.pos.column + ": " + this.msg;
+  };
 
   function new_doc() {
     return {
@@ -104,8 +144,9 @@ _block_part
 ) {
   return block;
 }
-/ line:(.*) nl? {
-  throw Error("invalid control line: " + line.join(""));
+/ line:([^\n]*) {
+  pos -= line.length;
+  throw new ParseError("invalid control line: " + line.join(""));
 }
 
 _block_start
