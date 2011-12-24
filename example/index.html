@@ -1,0 +1,165 @@
+<html>
+<head>
+  <title>Remora Interactive</title>
+
+  <link rel="stylesheet" href="libs/bootstrap-1.4.0/bootstrap.min.css">
+
+  <style>
+    textarea {
+      width: 100%;
+      height: 200px;
+    }
+
+    pre {
+      overflow: auto;
+      height: 300px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+<div class="container">
+  <div class="row">
+    <h1>Remora Interactive</h1>
+
+    <div class="span8">
+      <h2>1. Write a Template</h2>
+      <textarea id="templateTxt"></textarea>
+
+      <h3>Parsed</h3>
+      <div id="parseOutput"></div>
+    </div>
+
+    <div class="span8">
+      <h2>2. Give it some data</h2>
+      <textarea id="dataTxt"></textarea>
+
+      <h3>Rendered</h3>
+      <div id="renderOutput"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="libs/jquery-1.7.1.min.js"></script>
+<script src="libs/bootstrap-1.4.0/bootstrap-tabs.js"></script>
+<script data-main="../" src="../libs/require-1.0.2/require.js"></script>
+
+<script>
+  function log() {
+    console.log.apply(console, arguments);
+  }
+
+  requirejs.config({
+    paths: {
+      "text": "libs/require-1.0.2/text",
+      "underscore": "libs/underscore-1.2.3",
+      "PEG": "libs/peg-0.6.2-amd",
+      "remora/parser": "remora/parser.debug"
+    }
+  });
+
+  $("#templateTxt").text([
+    "<p>Hello, ${name}!</p>",
+    "% if friends.length > 0:",
+    "  <ul>",
+    "  % for friend in friends:",
+    "    <li>${friend.name}</li>",
+    "  % endfor",
+    "  </ul>",
+    /*
+    "% else:",
+    "  <p>I'm sorry... You don't appear to have any friends.</p>",
+    "  <p>Can I be your friend?</p>",
+    */
+    "% endif"
+  ].join("\n") + "\n");
+
+  $("#dataTxt").text([
+    "return {",
+    "  name: 'wolever',",
+    "  friends: [",
+    "    { name: 'Andrey' },",
+    "    { name: 'Alex' }",
+    "  ]",
+    "};"
+  ].join("\n") + "\n");
+
+  require(["underscore", "remora/remora", "./libs/jsDump-modified.js"],
+  function(_, remora) {
+    window._ = _;
+    window.remora = remora;
+
+    function errMessage(m) {
+      return remora.render(
+        "<div class='alert-message warning'>${msg|h}</div>",
+        { msg: m }
+      );
+    }
+
+    function onChange(elem, func) {
+      var lastVal = undefined;
+      function check() {
+        var curVal = elem.val();
+        if (lastVal != curVal) {
+          func(curVal);
+          lastVal = curVal;
+        }
+      }
+      check();
+      setInterval(check, 200);
+    };
+
+    var template = null;
+
+    function reRender() {
+      var output = $("#renderOutput");
+      output.empty();
+      if (!template)
+        return;
+      
+      var data;
+      try {
+        var js = "(function() {" + $("#dataTxt").val() + "})";
+        data = eval(js)();
+      } catch (e) {
+        output.html(errMessage(e));
+        return;
+      };
+
+      var rendered;
+      try {
+        rendered = template.render(data);
+      } catch (e) {
+        output.html(errMessage(e));
+        return;
+      }
+
+      output.append($("<pre></pre>").text(rendered));
+    };
+
+    onChange($("#templateTxt"), function(text) {
+      var output = $("#parseOutput");
+      output.empty();
+
+      try {
+        template = remora.Template(text);
+      } catch (e) {
+        template = null;
+        output.html(errMessage(e));
+        return;
+      }
+    
+      output.append($("<pre></pre>").text(jsDump.parse(template._parsed)));
+      reRender();
+    });
+
+    onChange($("#dataTxt"), reRender);
+  });
+
+</script>
+
+</body>
+</html>
