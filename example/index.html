@@ -53,6 +53,7 @@
   }
 
   requirejs.config({
+    urlArgs: "?_cachebuster=" + (+new Date()),
     paths: {
       "text": "libs/require-1.0.2/text",
       "underscore": "libs/underscore-1.2.3",
@@ -69,11 +70,9 @@
     "    <li>${friend.name}</li>",
     "  % endfor",
     "  </ul>",
-    /*
     "% else:",
     "  <p>I'm sorry... You don't appear to have any friends.</p>",
     "  <p>Can I be your friend?</p>",
-    */
     "% endif"
   ].join("\n") + "\n");
 
@@ -148,6 +147,7 @@
         template = remora.Template(text);
       } catch (e) {
         template = null;
+        window.e = e;
         output.html(errMessage(e));
         return;
       }

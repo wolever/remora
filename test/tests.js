@@ -150,6 +150,61 @@ function(remora, parser, _) {
         },
       ]
     },
+
+    {
+      name: "if/elif/else",
+      input: (
+        "% if foo:\n" +
+        "  foo\n" +
+        "% elif bar:\n" +
+        "  bar\n" +
+        "% else:\n" +
+        "  neither\n" +
+        "% endif"
+      ),
+      expected_ast: [{
+        type: "controlblock",
+        keyword: "if",
+        expr: "foo",
+        body: {
+          type: "doc",
+          children: ["  foo\n"]
+        },
+        sub_blocks: [
+          {
+            type: "controlblock",
+            keyword: "elif",
+            expr: "bar",
+            body: {
+              type: "doc",
+              children: ["  bar\n"]
+            }
+          },
+          {
+            type: "controlblock",
+            keyword: "else",
+            body: {
+              type: "doc",
+              children: ["  neither\n"]
+            }
+          }
+        ]
+      }],
+      expected_renders: [
+        { __name: "if-clause",
+          foo: true, bar: false,
+          __expected: "  foo\n"
+        },
+        { __name: "elif-clause",
+          foo: false, bar: true,
+          __expected: "  bar\n"
+        },
+        { __name: "if-clause",
+          foo: false, bar: false,
+          __expected: "  neither\n"
+        },
+      ]
+    }
   ];
 
   var runTests = function() {

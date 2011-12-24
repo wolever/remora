@@ -40,6 +40,20 @@
     return "ParseError at " + this.pos.line + ":" + this.pos.column + ": " + this.msg;
   };
 
+  function assertCurrentBlockIfElif(keyword) {
+    var prev_keyword = (cur_block || {}).keyword
+    if (prev_keyword == "if") {
+      var sub_blocks = cur_block.sub_blocks || [];
+      if (sub_blocks.length == 0)
+        return;
+      prev_keyword = sub_blocks[sub_blocks.length - 1].keyword;
+      if (prev_keyword == "elif")
+        return;
+    }
+    throw new ParseError("'" + keyword + "' must come after an 'if' or " +
+                         "'elif', not '" + prev_keyword + "'.");
+  }
+
   function new_doc() {
     return {
       type: "doc",
@@ -150,9 +164,8 @@ _block_part
 }
 
 _block_start
-= block:_block_start_body _ e:([^:]+) ":" nl {
+= block:_block_start_body ":" nl {
   block.type = "controlblock";
-  block.expr = e.join("");
   block.body = new_doc();
 
   doc_stack.push(cur_doc);
@@ -163,20 +176,52 @@ _block_start
 }
 
 _block_start_body
-= "for" _ v:var _ "in" {
+= "for" _+ v:var _+ "in" e:_block_expr {
   return {
+    expr: e,
     keyword: "for",
     vars: [v]
   };
 }
-/ kw:( "if" / "while" ) {
+/ kw:( "if" / "while" ) e:_block_expr {
   return {
+    expr: e,
     keyword: kw
   };
 }
 
 _block_mid
-= "stuff!!"
+= block:_block_mid_body _* ":" nl {
+  if (!cur_block.sub_blocks)
+    cur_block.sub_blocks = [];
+  cur_block.sub_blocks.push(block);
+
+  block.type = "controlblock";
+  block.body = new_doc();
+
+  fixup_doc(cur_doc);
+  cur_doc = block.body;
+}
+
+_block_mid_body
+= "elif" _+ e:_block_expr {
+  assertCurrentBlockIfElif("elif");
+  return {
+    keyword: "elif",
+    expr: e
+  };
+}
+/ "else" {
+  assertCurrentBlockIfElif("else");
+  return {
+    keyword: "else"
+  };
+}
+
+_block_expr
+= _* e:([^:]+) {
+  return e.join("");
+}
 
 _block_end
 = "end" keyword:var nl {

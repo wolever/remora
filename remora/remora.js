@@ -13,7 +13,15 @@ function(_, parser, tree2js) {
     self.compile = function() {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
-      self._render = eval(self._js);
+      try {
+        self._render = eval(self._js);
+      } catch (e) {
+        var err = Error("on line " + e.lineNumber + " of generated " +
+                        "JavaScript (see err.script): " + e);
+        err.original = e;
+        err.script = self._js;
+        throw err;
+      }
     };
 
     self.render = function(data) {
