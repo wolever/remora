@@ -9,14 +9,22 @@ function() {
 
     self.convert = function(tree) {
       var result = [
-        "(function(__context) {\n",
-        "  var __write = function(val) { __context.write(val); }\n",
-        "  with(__context.data) {\n"
+        "(function() {\n" +
+        "  function __foreach(obj, func) {\n" +
+        "    if (!obj) return;\n" +
+        "    for (var key in obj)\n" +
+        "      if (obj.hasOwnProperty(key))\n" +
+        "        func(obj[key], key, obj);\n" +
+        "  }\n" +
+        "  return (function(__context) {\n" +
+        "    var __write = function(val) { __context.write(val); }\n" +
+        "    with(__context.data) {\n"
       ];
       self.walk(tree, result);
       result.push.apply(result, [
-        "  }\n",
-        "})"
+        "    }\n" +
+        "  });\n" +
+        "})();"
       ]);
       return result.join("");
     };
@@ -51,6 +59,22 @@ function() {
       result.push("(" + node.expr + ")");
       result.push(filter_closeparens + ");\n");
     };
+
+    self.walk_controlblock = function(node, result) {
+      if (node.keyword == "for") {
+        var args = node.vars.join(", ");
+        result.push("__foreach(" + node.expr + ", function(" + args + ") {\n");
+        self.walk(node.body, result);
+        result.push("});\n")
+      } else if (node.keyword == "if" || node.keyword == "while") {
+        result.push(node.keyword + " (" + node.expr + ") {\n");
+        self.walk(node.body, result);
+        result.push("}\n");
+      } else {
+        throw Error("unknown control block keyword: " + node.keyword);
+      }
+    };
+
     return self;
   };
 
