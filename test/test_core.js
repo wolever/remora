@@ -259,7 +259,6 @@ function(remora, parser, _) {
     });
   });
 
-
   module("remora.render");
 
   test("doesn't crash on null", function() {

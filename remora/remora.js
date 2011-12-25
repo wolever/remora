@@ -1,5 +1,5 @@
-define(["underscore", "remora/parser", "remora/tree2js"],
-function(_, parser, tree2js) {
+define(["underscore", "remora/parser", "remora/tree2js", "remora/evaler"],
+function(_, parser, tree2js, evaler) {
   function Template(text) {
     var self = {
       converter: tree2js.Tree2JS()
@@ -14,13 +14,12 @@ function(_, parser, tree2js) {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
       try {
-        self._render = eval(self._js);
+        self._render = evaler.eval(self._js);
       } catch (e) {
-        var err = Error("on line " + e.lineNumber + " of generated " +
-                        "JavaScript (see err.script): " + e);
-        err.original = e;
-        err.script = self._js;
-        throw err;
+        e.message = "with line " + e.lineNumber + " of generated JavaScript " +
+                    "(see global __bad_script): " + e.message;
+        /* global */ __bad_script = self._js;
+        throw e;
       }
     };
 
