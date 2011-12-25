@@ -1,12 +1,12 @@
-define(["underscore", "remora/parser", "remora/tree2js"],
-function(_, parser, tree2js) {
+define(["underscore", "remora/parser", "remora/tree2js", "remora/evaler"],
+function(_, parser, tree2js, evaler) {
   function Template(text) {
     var self = {
       converter: tree2js.Tree2JS()
     };
 
     self.setText = function(text) {
-      self.text = text;
+      self.text = "" + text;
       self.compile();
     };
 
@@ -14,13 +14,12 @@ function(_, parser, tree2js) {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
       try {
-        self._render = eval(self._js);
+        self._render = evaler.eval(self._js);
       } catch (e) {
-        var err = Error("on line " + e.lineNumber + " of generated " +
-                        "JavaScript (see err.script): " + e);
-        err.original = e;
-        err.script = self._js;
-        throw err;
+        e.message = "with generated JavaScript (see global __bad_script) line " +
+                    e.lineNumber + ": " + e.message;
+        /* global */ __bad_script = self._js;
+        throw e;
       }
     };
 
@@ -28,7 +27,17 @@ function(_, parser, tree2js) {
       var context = RenderContext({
         data: data
       });
-      self._render(context);
+      try {
+        self._render(context);
+      } catch (e) {
+        if (e.templatePos) {
+          var loc = self._parsed.computeLocation(e.templatePos);
+          e.templateLocation = loc;
+          e.message = "with template line " + loc.line + ": " + e;
+        }
+        throw e;
+      }
+
       return context.buffer.join("");
     };
 
@@ -36,6 +45,25 @@ function(_, parser, tree2js) {
     return self;
   };
 
+  Template.smartLoad = function(obj) {
+    if (typeof obj === "string")
+      return Template(obj);
+
+    if (obj === null || obj === undefined)
+      return Template("" + obj);
+
+    // When passed a jQuery selector, use the first item.
+    if (obj.jquery)
+      obj = obj[0];
+
+    // This is how jQuery detects DOM nodes, and it seems reasonable... So I'm
+    // going to copy it.
+    if (obj.nodeType)
+      return Template(obj.innerHTML);
+
+    return Template("" + obj);
+  };
+      
   function RenderContext(options) {
     var self = _.extend({
       buffer: [],
@@ -72,7 +100,7 @@ function(_, parser, tree2js) {
     Template: Template,
     RenderContext: RenderContext,
     render: function(text, data) {
-      return Template(text).render(data);
+      return Template.smartLoad(text).render(data);
     }
   };
 });

@@ -1,5 +1,5 @@
 {
-  function computeCurrentPos() {
+  function computeLocation(pos) {
     /*
      * The first idea was to use |String.split| to break the input up to the
      * error position along newlines and derive the line and column from
@@ -30,14 +30,35 @@
     return { line: line, column: column, pos: pos };
   }
 
+  function Node(type, options) {
+    if (!(this instanceof Node)) {
+      return new Node(type, options);
+    };
+
+    for (var key in options)
+      if (options.hasOwnProperty(key))
+        this[key] = options[key];
+    this.type = type;
+    this.pos = this.pos || pos;
+  }
+
+  Node.prototype = {
+    originalInput: input,
+    computeLocation: computeLocation,
+    toString: function() {
+      return "[Node type='" + this.type + "']";
+    }
+  };
+
   function ParseError(message) {
-    this.pos = computeCurrentPos();
+    this.location = computeLocation(pos);
     this.msg = message;
     this.message = this.toString();
   }
 
   ParseError.prototype.toString = function() {
-    return "ParseError at " + this.pos.line + ":" + this.pos.column + ": " + this.msg;
+    var loc = this.location;
+    return "ParseError at " + loc.line + ":" + pos.column + ": " + this.msg;
   };
 
   function assertCurrentBlockIfElif(keyword) {
@@ -54,12 +75,11 @@
                          "'elif', not '" + prev_keyword + "'.");
   }
 
-  function new_doc() {
-    return {
-      type: "doc",
+  function DocNode() {
+    return Node("doc", {
       children: []
-    };
-  }
+    });
+  };
 
   function fixup_doc(d) {
     if (d.added_nl) {
@@ -90,7 +110,7 @@
   }
 
   var doc_stack = [];
-  var cur_doc = new_doc();
+  var cur_doc = DocNode();
 
   var block_stack = [];
   var cur_block = null;
@@ -120,11 +140,10 @@ markup
 
 expression
 = "${" body:exprbody  "}" {
-  return {
-    type: "expression",
+  return Node("expression", {
     expr: body.expr,
     filters: body.filter
-  };
+  });
 }
 
 exprbody
@@ -164,9 +183,9 @@ _block_part
 }
 
 _block_start
-= block:_block_start_body ":" nl {
-  block.type = "controlblock";
-  block.body = new_doc();
+= bl_options:_block_start_body ":" nl {
+  block = Node("controlblock", bl_options);
+  block.body = DocNode();
 
   doc_stack.push(cur_doc);
   cur_doc = block.body;
@@ -191,13 +210,13 @@ _block_start_body
 }
 
 _block_mid
-= block:_block_mid_body _* ":" nl {
+= bl_options:_block_mid_body _* ":" nl {
+  block = Node("controlblock", bl_options);
+  block.body = DocNode();
+
   if (!cur_block.sub_blocks)
     cur_block.sub_blocks = [];
   cur_block.sub_blocks.push(block);
-
-  block.type = "controlblock";
-  block.body = new_doc();
 
   fixup_doc(cur_doc);
   cur_doc = block.body;

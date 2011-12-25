@@ -18,10 +18,16 @@ function() {
         "  }\n" +
         "  return (function(__context) {\n" +
         "    var __write = function(val) { __context.write(val); }\n" +
-        "    with(__context.data) {\n"
+        "    var __pos = -1;\n" +
+        "    try {\n" +
+        "      with(__context.data) {\n"
       ];
       self.walk(tree, result);
       result.push.apply(result, [
+        "      }\n" +
+        "    } catch (e) {\n" +
+        "      e.templatePos = __pos;\n" +
+        "      throw e;\n" +
         "    }\n" +
         "  });\n" +
         "})();"
@@ -34,7 +40,13 @@ function() {
       if (!handler)
         throw Error("unknown node type: " + node.type);
 
+      if (node.type !== "controlblock")
+        self._writePos(node, result);
       handler(node, result);
+    };
+
+    self._writePos = function(node, result, suffix) {
+      result.push("__pos = " + self.stringify(node.pos) + (suffix || ";\n"));
     };
 
     self.walk_doc = function(node, result) {
@@ -64,14 +76,19 @@ function() {
       var end_block = "}\n";
       if (node.keyword == "for") {
         var args = node.vars.join(", ");
+        self._writePos(node, result);
         result.push("__foreach(" + node.expr + ", function(" + args + ") {\n");
         end_block = "});\n";
       } else if (node.keyword == "if" || node.keyword == "while") {
+        self._writePos(node, result);
         result.push(node.keyword + " (" + node.expr + ") {\n");
       } else if (node.keyword == "elif") {
-        result.push("else if (" + node.expr + ") {\n");
+        result.push("else if (");
+        self._writePos(node, result, ", ");
+        result.push(node.expr + ") {\n");
       } else if (node.keyword == "else") {
         result.push(" else {\n");
+        self._writePos(node, result);
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
       }

@@ -1,6 +1,28 @@
 require(["remora/remora", "remora/parser", "underscore"],
 function(remora, parser, _) {
 
+  function _copyAST(actual, expected) {
+    if (typeof actual !== "object")
+      return actual;
+
+    var copy = new expected.constructor();
+
+    for (var key in expected) {
+      if (expected.hasOwnProperty(key)) { 
+        var actualVal = actual[key];
+        if (actualVal !== undefined)
+          copy[key] = _copyAST(actualVal, expected[key]);
+      }
+    }
+
+    return copy;
+  }
+
+  function astEqual(actual, expected) {
+    var actualCopy = _copyAST(actual, expected);
+    deepEqual(actualCopy, expected);
+  }
+
   var testcases = [
     {
       name: "expr simple",
@@ -220,7 +242,7 @@ function(remora, parser, _) {
     test(testcase.name, function() {
       var actual = parser.parse(testcase.input);
       equal(actual.type, "doc");
-      deepEqual(actual.children, testcase.expected_ast);
+      astEqual(actual.children, testcase.expected_ast);
     });
   });
 
@@ -236,5 +258,53 @@ function(remora, parser, _) {
       });
     });
   });
+
+  /*
+  test("includes line number on JS syntax errors", function() {
+    remora.render("1\n2\n3\n${invalid expression}");
+  });
+  */
+
+  test("includes line number on runtime errors", function() {
+    try {
+      remora.render("1\n2\n3\n${null.foo}");
+    } catch (e) {
+      equal(e.templateLocation.line, 4);
+      return;
+    }
+    throw Error("expected error not raised!");
+  });
+
+  module("remora.render");
+
+  test("doesn't crash on null", function() {
+    var rendered = remora.render(null, {});
+    equal(rendered, "null");
+  });
+
+  test("works without data argument", function() {
+    var rendered = remora.render("42");
+    equal(rendered, "42");
+  });
+
+  if (typeof document !== "undefined") {
+    function getScriptTemplateElem() {
+      var parent = document.createElement("div");
+      parent.innerHTML = ([
+        "<script type='text/remora-template'>",
+        "&amp; ${foo} <div>",
+        "</script>"
+      ].join(""));
+      var scriptElem = parent.children[0];
+      equal(scriptElem.tagName.toLowerCase(), "script");
+      return scriptElem;
+    }
+
+    test("loading from a script element", function() {
+      var elem = getScriptTemplateElem();
+      var rendered = remora.render(elem, { foo: 42 });
+      equal(rendered, "&amp; 42 <div>");
+    });
+  };
 
 });

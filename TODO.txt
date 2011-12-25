@@ -1,0 +1,2 @@
+- Auto-escaping options
+- Helpful errors when JS expressions inside templates throw errors

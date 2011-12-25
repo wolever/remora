@@ -7,7 +7,7 @@
 
   <script>
     requirejs.config({
-      urlArgs: "?_cachebuster=" + (+new Date()),
+      urlArgs: "_cachebuster=" + (+new Date()),
       paths: {
         "text": "libs/require-1.0.2/text",
         "underscore": "libs/underscore-1.2.3",
@@ -36,7 +36,8 @@
     }
   </script>
 
-  <script src="tests.js"></script>
+  <script src="test_evaler.js"></script>
+  <script src="test_core.js"></script>
 </head>
 
 <body>
