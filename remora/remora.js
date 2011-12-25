@@ -102,7 +102,7 @@ function(_, parser, tree2js, evaler) {
       return _.escape(text);
     },
     trim: function(text) {
-      return text.trim();
+      return text.replace(/^[ \t\n\v]*/, "").replace(/[ \n\t\v]*$/, "");
     }
   };
 
