@@ -31,24 +31,11 @@
   }
 
   function Node(type, options) {
-    if (!(this instanceof Node)) {
-      return new Node(type, options);
-    };
-
-    for (var key in options)
-      if (options.hasOwnProperty(key))
-        this[key] = options[key];
-    this.type = type;
-    this.pos = this.pos || pos;
+    options = options || {};
+    options.type = type;
+    options.pos = options.pos || pos;
+    return options;
   }
-
-  Node.prototype = {
-    originalInput: input,
-    computeLocation: computeLocation,
-    toString: function() {
-      return "[Node type='" + this.type + "']";
-    }
-  };
 
   function ParseError(message) {
     this.location = computeLocation(pos);
@@ -119,6 +106,12 @@
     cur_doc.added_nl = true;
     input += "\n";
   }
+}
+
+root_doc
+= doc:doc {
+  doc.computeLocation = computeLocation;
+  return doc;
 }
 
 doc
