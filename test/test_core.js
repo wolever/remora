@@ -259,11 +259,15 @@ function(remora, parser, _) {
     });
   });
 
-  /*
   test("includes line number on JS syntax errors", function() {
-    remora.render("1\n2\n3\n${invalid expression}");
+    try {
+      remora.render("1\n2\n${invalid expression}");
+    } catch (e) {
+      equal(e.templateLocation.line, 3);
+      return;
+    }
+    throw Error("expected error not raised!");
   });
-  */
 
   test("includes line number on runtime errors", function() {
     try {
