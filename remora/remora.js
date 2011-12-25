@@ -6,7 +6,7 @@ function(_, parser, tree2js) {
     };
 
     self.setText = function(text) {
-      self.text = text;
+      self.text = "" + text;
       self.compile();
     };
 
@@ -36,6 +36,25 @@ function(_, parser, tree2js) {
     return self;
   };
 
+  Template.smartLoad = function(obj) {
+    if (typeof obj === "string")
+      return Template(obj);
+
+    if (obj === null || obj === undefined)
+      return Template("" + obj);
+
+    // When passed a jQuery selector, use the first item.
+    if (obj.jquery)
+      obj = obj[0];
+
+    // This is how jQuery detects DOM nodes, and it seems reasonable... So I'm
+    // going to copy it.
+    if (obj.nodeType)
+      return Template(obj.innerHTML);
+
+    return Template("" + obj);
+  };
+      
   function RenderContext(options) {
     var self = _.extend({
       buffer: [],
@@ -72,7 +91,7 @@ function(_, parser, tree2js) {
     Template: Template,
     RenderContext: RenderContext,
     render: function(text, data) {
-      return Template(text).render(data);
+      return Template.smartLoad(text).render(data);
     }
   };
 });

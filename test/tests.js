@@ -237,4 +237,37 @@ function(remora, parser, _) {
     });
   });
 
+
+  module("remora.render");
+
+  test("doesn't crash on null", function() {
+    var rendered = remora.render(null, {});
+    equal(rendered, "null");
+  });
+
+  test("works without data argument", function() {
+    var rendered = remora.render("42");
+    equal(rendered, "42");
+  });
+
+  if (typeof document !== "undefined") {
+    function getScriptTemplateElem() {
+      var parent = document.createElement("div");
+      parent.innerHTML = ([
+        "<script type='text/remora-template'>",
+        "&amp; ${foo} <div>",
+        "</script>"
+      ].join(""));
+      var scriptElem = parent.children[0];
+      equal(scriptElem.tagName.toLowerCase(), "script");
+      return scriptElem;
+    }
+
+    test("loading from a script element", function() {
+      var elem = getScriptTemplateElem();
+      var rendered = remora.render(elem, { foo: 42 });
+      equal(rendered, "&amp; 42 <div>");
+    });
+  };
+
 });
