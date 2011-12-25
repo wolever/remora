@@ -1,29 +1,5 @@
 {
-  function Node(type, options) {
-    if (!(this instanceof Node)) {
-      return new Node(type, options);
-    };
-
-    for (var key in options)
-      if (options.hasOwnProperty(key))
-        this[key] = options[key];
-    this.type = type;
-    this.pos = this.pos || pos;
-  }
-
-  Node.prototype = {
-    originalInput: input,
-    getLocation: function() {
-      if (!this._location)
-        this._location = computePosition(this.originalInput, this.pos);
-      return this._location;
-    },
-    toString: function() {
-      return "[Node type='" + this.type + "']";
-    }
-  };
-
-  function computePosition(input, pos) {
+  function computeLocation(pos) {
     /*
      * The first idea was to use |String.split| to break the input up to the
      * error position along newlines and derive the line and column from
@@ -54,8 +30,28 @@
     return { line: line, column: column, pos: pos };
   }
 
+  function Node(type, options) {
+    if (!(this instanceof Node)) {
+      return new Node(type, options);
+    };
+
+    for (var key in options)
+      if (options.hasOwnProperty(key))
+        this[key] = options[key];
+    this.type = type;
+    this.pos = this.pos || pos;
+  }
+
+  Node.prototype = {
+    originalInput: input,
+    computeLocation: computeLocation,
+    toString: function() {
+      return "[Node type='" + this.type + "']";
+    }
+  };
+
   function ParseError(message) {
-    this.location = computePosition(input, pos);
+    this.location = computeLocation(pos);
     this.msg = message;
     this.message = this.toString();
   }

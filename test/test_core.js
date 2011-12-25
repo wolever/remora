@@ -259,6 +259,22 @@ function(remora, parser, _) {
     });
   });
 
+  /*
+  test("includes line number on JS syntax errors", function() {
+    remora.render("1\n2\n3\n${invalid expression}");
+  });
+  */
+
+  test("includes line number on runtime errors", function() {
+    try {
+      remora.render("1\n2\n3\n${null.foo}");
+    } catch (e) {
+      equal(e.templateLocation.line, 4);
+      return;
+    }
+    throw Error("expected error not raised!");
+  });
+
   module("remora.render");
 
   test("doesn't crash on null", function() {

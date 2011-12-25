@@ -16,8 +16,8 @@ function(_, parser, tree2js, evaler) {
       try {
         self._render = evaler.eval(self._js);
       } catch (e) {
-        e.message = "with line " + e.lineNumber + " of generated JavaScript " +
-                    "(see global __bad_script): " + e.message;
+        e.message = "with generated JavaScript (see global __bad_script) line " +
+                    e.lineNumber + ": " + e.message;
         /* global */ __bad_script = self._js;
         throw e;
       }
@@ -27,7 +27,17 @@ function(_, parser, tree2js, evaler) {
       var context = RenderContext({
         data: data
       });
-      self._render(context);
+      try {
+        self._render(context);
+      } catch (e) {
+        if (e.templatePos) {
+          var loc = self._parsed.computeLocation(e.templatePos);
+          e.templateLocation = loc;
+          e.message = "with template line " + loc.line + ": " + e;
+        }
+        throw e;
+      }
+
       return context.buffer.join("");
     };
 
