@@ -1,6 +1,28 @@
 require(["remora/remora", "remora/parser", "underscore"],
 function(remora, parser, _) {
 
+  function _copyAST(actual, expected) {
+    if (typeof actual !== "object")
+      return actual;
+
+    var copy = new expected.constructor();
+
+    for (var key in expected) {
+      if (expected.hasOwnProperty(key)) { 
+        var actualVal = actual[key];
+        if (actualVal !== undefined)
+          copy[key] = _copyAST(actualVal, expected[key]);
+      }
+    }
+
+    return copy;
+  }
+
+  function astEqual(actual, expected) {
+    var actualCopy = _copyAST(actual, expected);
+    deepEqual(actualCopy, expected);
+  }
+
   var testcases = [
     {
       name: "expr simple",
@@ -220,7 +242,7 @@ function(remora, parser, _) {
     test(testcase.name, function() {
       var actual = parser.parse(testcase.input);
       equal(actual.type, "doc");
-      deepEqual(actual.children, testcase.expected_ast);
+      astEqual(actual.children, testcase.expected_ast);
     });
   });
 

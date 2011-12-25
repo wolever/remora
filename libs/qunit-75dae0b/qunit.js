@@ -1159,7 +1159,7 @@ QUnit.equiv = function () {
  */
 QUnit.jsDump = (function() {
 	function quote( str ) {
-		return '"' + str.toString().replace(/"/g, '\\"') + '"';
+		return '"' + str.toString().replace(/"/g, '\\"').replace(/\n/g, "\\n") + '"';
 	};
 	function literal( o ) {
 		return o + '';
