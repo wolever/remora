@@ -8,10 +8,15 @@ function() {
     };
 
     self.emit = function(fragment) {
+      var offset = 0;
+      while ((offset = fragment.indexOf("\n", offset) + 1) > 0)
+        self._resultLine += 1;
       self._result.push(fragment);
     };
 
     self.convert = function(tree) {
+      self._resultLine = 1;
+      self._positionMappings = [];
       self._result = [];
 
       self.emit(
@@ -25,21 +30,32 @@ function() {
         "  return (function(__context) {\n" +
         "    var __write = function(val) { __context.write(val); }\n" +
         "    var __pos = -1;\n" +
-        "    try {\n" +
-        "      with(__context.data) {\n"
+        "    with(__context.data) {\n"
       );
       self.walk(tree);
       self.emit(
-        "      }\n" +
-        "    } catch (e) {\n" +
-        "      e.templatePos = __pos;\n" +
-        "      throw e;\n" +
         "    }\n" +
         "  });\n" +
         "})();"
       );
-      var result = self._result.join("");
+      var source = self._result.join("");
+      var positionMappings = self._positionMappings;
+      var result = {
+        source: source,
+        sourceLineToTemplatePos: function(sourceLine) {
+          var pos = -1;
+          for (var i = 0; i < positionMappings.length; i += 1) {
+            var mapping = positionMappings[i];
+            if (sourceLine >= mapping[0])
+              pos = mapping[1];
+          }
+
+          return pos;
+        }
+      };
       delete self._result;
+      delete self._positionMappings;
+      delete self._resultLine;
       return result;
     };
 
@@ -48,13 +64,12 @@ function() {
       if (!handler)
         throw Error("unknown node type: " + node.type);
 
-      if (node.type !== "controlblock")
-        self._writePos(node);
+      self.notePosition(node);
       handler(node);
     };
 
-    self._writePos = function(node, suffix) {
-      self.emit("__pos = " + self.stringify(node.pos) + (suffix || ";\n"));
+    self.notePosition = function(node, suffix) {
+      self._positionMappings.push([self._resultLine, node.pos]);
     };
 
     self.walk_doc = function(node) {
@@ -84,19 +99,14 @@ function() {
       var end_block = "}\n";
       if (node.keyword == "for") {
         var args = node.vars.join(", ");
-        self._writePos(node);
         self.emit("__foreach(" + node.expr + ", function(" + args + ") {\n");
         end_block = "});\n";
       } else if (node.keyword == "if" || node.keyword == "while") {
-        self._writePos(node);
         self.emit(node.keyword + " (" + node.expr + ") {\n");
       } else if (node.keyword == "elif") {
-        self.emit("else if (");
-        self._writePos(node, ", ");
-        self.emit(node.expr + ") {\n");
+        self.emit("else if (" + node.expr + ") {\n");
       } else if (node.keyword == "else") {
         self.emit(" else {\n");
-        self._writePos(node);
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
       }
