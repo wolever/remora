@@ -1,9 +1,18 @@
 (function() {
   var offset = 0;
 
-  function evalHelper(js) {
+  // Note: because not all environments support line numbers in errors, it
+  // might be useful to add an 'evalAsync' function at some point in the future
+  // which will evaluate the code by appending a "<script>" element to the
+  // document. This was attempted (search commit log for 'evaler.evalAsync'),
+  // but the details turn out to be kind of annoying, so it wasn't finished.
+
+  function evalSync(js) {
     try {
-      return eval(js);
+      // The parens are added around the JS to ensure that it is a simple
+      // expression and not an arbitrary block of code. This will make the
+      // (potential) future implementaiton of an 'evalAsync' less painful.
+      return eval("(" + js + ")");
     } catch (e) {
       e.message = "with eval'd code (see err.source): " + e;
       if (e.lineNumber) {
@@ -24,10 +33,12 @@
   // that offset is here so that the line numbers in the errors we return will
   // be relative to the eval'd source.
   try {
-    evalHelper("throw Error()");
+    evalSync("(function() { throw Error(); })()");
   } catch (e) {
     offset = e.lineNumber - 1;
   }
 
-  define({ eval: evalHelper });
+  evalSync.supportsErrorLineNumbers = (offset >= 0);
+
+  define({ evalSync: evalSync });
 })();

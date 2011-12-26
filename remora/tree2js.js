@@ -34,7 +34,7 @@ function() {
       self.emit(
         "    }\n" +
         "  });\n" +
-        "})();"
+        "})()"
       );
       var source = self._result.join("");
       var positionMappings = self._positionMappings;

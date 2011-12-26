@@ -20,7 +20,7 @@ function(_, parser, tree2js, evaler) {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
       try {
-        self._render = evaler.eval(self._js.source);
+        self._render = evaler.evalSync(self._js.source);
       } catch (e) {
         var tmplLineMsg = "";
         self._setTemplateErrorLocation(e);
