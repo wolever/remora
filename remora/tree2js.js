@@ -28,7 +28,6 @@ function() {
         "        func(obj[key], key, obj);\n" +
         "  }\n" +
         "  return (function(__context) {\n" +
-        "    var __write = function(val) { __context.write(val); }\n" +
         "    with(__context.data) {\n"
       );
       self.walk(tree);
@@ -75,7 +74,7 @@ function() {
       for (var i = 0; i < node.children.length; i += 1) {
         var val = node.children[i];
         if (typeof val === "string") {
-          self.emit("__write(" + self.stringify(val) + ");\n");
+          self.emit("__context.write(" + self.stringify(val) + ");\n");
         } else {
           self.walk(val);
         }
@@ -83,7 +82,7 @@ function() {
     };
 
     self.walk_expression = function(node) {
-      self.emit("__write(");
+      self.emit("__context.write(");
       var filter_closeparens = "";
       for (var i = 0; i < node.filters.length; i += 1) {
         var filter = node.filters[i];
