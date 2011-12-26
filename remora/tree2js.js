@@ -7,8 +7,19 @@ function() {
       return JSON.stringify(val);
     };
 
+    self.emit = function(fragment) {
+      var offset = 0;
+      while ((offset = fragment.indexOf("\n", offset) + 1) > 0)
+        self._resultLine += 1;
+      self._result.push(fragment);
+    };
+
     self.convert = function(tree) {
-      var result = [
+      self._resultLine = 1;
+      self._positionMappings = [];
+      self._result = [];
+
+      self.emit(
         "(function() {\n" +
         "  function __foreach(obj, func) {\n" +
         "    if (!obj) return;\n" +
@@ -19,87 +30,94 @@ function() {
         "  return (function(__context) {\n" +
         "    var __write = function(val) { __context.write(val); }\n" +
         "    var __pos = -1;\n" +
-        "    try {\n" +
-        "      with(__context.data) {\n"
-      ];
-      self.walk(tree, result);
-      result.push.apply(result, [
-        "      }\n" +
-        "    } catch (e) {\n" +
-        "      e.templatePos = __pos;\n" +
-        "      throw e;\n" +
+        "    with(__context.data) {\n"
+      );
+      self.walk(tree);
+      self.emit(
         "    }\n" +
         "  });\n" +
         "})();"
-      ]);
-      return result.join("");
+      );
+      var source = self._result.join("");
+      var positionMappings = self._positionMappings;
+      var result = {
+        source: source,
+        sourceLineToTemplatePos: function(sourceLine) {
+          var pos = -1;
+          for (var i = 0; i < positionMappings.length; i += 1) {
+            var mapping = positionMappings[i];
+            if (sourceLine >= mapping[0])
+              pos = mapping[1];
+          }
+
+          return pos;
+        }
+      };
+      delete self._result;
+      delete self._positionMappings;
+      delete self._resultLine;
+      return result;
     };
 
-    self.walk = function(node, result) {
+    self.walk = function(node) {
       var handler = self["walk_" + node.type];
       if (!handler)
         throw Error("unknown node type: " + node.type);
 
-      if (node.type !== "controlblock")
-        self._writePos(node, result);
-      handler(node, result);
+      self.notePosition(node);
+      handler(node);
     };
 
-    self._writePos = function(node, result, suffix) {
-      result.push("__pos = " + self.stringify(node.pos) + (suffix || ";\n"));
+    self.notePosition = function(node, suffix) {
+      self._positionMappings.push([self._resultLine, node.pos]);
     };
 
-    self.walk_doc = function(node, result) {
+    self.walk_doc = function(node) {
       for (var i = 0; i < node.children.length; i += 1) {
         var val = node.children[i];
         if (typeof val === "string") {
-          result.push("__write(" + self.stringify(val) + ");\n");
+          self.emit("__write(" + self.stringify(val) + ");\n");
         } else {
-          self.walk(val, result);
+          self.walk(val);
         }
       }
     };
 
-    self.walk_expression = function(node, result) {
-      result.push("__write(");
+    self.walk_expression = function(node) {
+      self.emit("__write(");
       var filter_closeparens = "";
       for (var i = 0; i < node.filters.length; i += 1) {
         var filter = node.filters[i];
-        result.push("__context.filter(" + self.stringify(filter) + ", ");
+        self.emit("__context.filter(" + self.stringify(filter) + ", ");
         filter_closeparens += ")";
       }
-      result.push("(" + node.expr + ")");
-      result.push(filter_closeparens + ");\n");
+      self.emit("(" + node.expr + ")");
+      self.emit(filter_closeparens + ");\n");
     };
 
-    self.walk_controlblock = function(node, result) {
+    self.walk_controlblock = function(node) {
       var end_block = "}\n";
       if (node.keyword == "for") {
         var args = node.vars.join(", ");
-        self._writePos(node, result);
-        result.push("__foreach(" + node.expr + ", function(" + args + ") {\n");
+        self.emit("__foreach(" + node.expr + ", function(" + args + ") {\n");
         end_block = "});\n";
       } else if (node.keyword == "if" || node.keyword == "while") {
-        self._writePos(node, result);
-        result.push(node.keyword + " (" + node.expr + ") {\n");
+        self.emit(node.keyword + " (" + node.expr + ") {\n");
       } else if (node.keyword == "elif") {
-        result.push("else if (");
-        self._writePos(node, result, ", ");
-        result.push(node.expr + ") {\n");
+        self.emit("else if (" + node.expr + ") {\n");
       } else if (node.keyword == "else") {
-        result.push(" else {\n");
-        self._writePos(node, result);
+        self.emit(" else {\n");
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
       }
 
-      self.walk(node.body, result);
-      result.push(end_block);
+      self.walk(node.body);
+      self.emit(end_block);
 
       var sub_blocks = node.sub_blocks || [];
       for (var i = 0; i < sub_blocks.length; i += 1) {
         var sub_block = sub_blocks[i];
-        self.walk(sub_block, result);
+        self.walk(sub_block);
       }
     };
 

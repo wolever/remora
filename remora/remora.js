@@ -10,15 +10,27 @@ function(_, parser, tree2js, evaler) {
       self.compile();
     };
 
+    self._setTemplateErrorLocation = function(e) {
+      var templatePos = self._js.sourceLineToTemplatePos(e.lineNumber);
+      if (templatePos >= 0) {
+        var loc = self._parsed.computeLocation(templatePos);
+        e.templateLocation = loc;
+      }
+    };
+
     self.compile = function() {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
       try {
-        self._render = evaler.eval(self._js);
+        self._render = evaler.eval(self._js.source);
       } catch (e) {
+        var tmplLineMsg = "";
+        self._setTemplateErrorLocation(e);
+        if (e.templateLocation)
+          tmplLineMsg = " (template line " + e.templateLocation.line + ")";
         e.message = "with generated JavaScript (see global __bad_script) line " +
-                    e.lineNumber + ": " + e.message;
-        /* global */ __bad_script = self._js;
+                    e.lineNumber + tmplLineMsg + ": " + e.message;
+        /* global */ __bad_script = self._js.source;
         throw e;
       }
     };
@@ -30,11 +42,9 @@ function(_, parser, tree2js, evaler) {
       try {
         self._render(context);
       } catch (e) {
-        if (e.templatePos) {
-          var loc = self._parsed.computeLocation(e.templatePos);
-          e.templateLocation = loc;
-          e.message = "with template line " + loc.line + ": " + e;
-        }
+        self._setTemplateErrorLocation(e);
+        if (e.templateLocation)
+          e.message = "with template line " + e.templateLocation.line + ": " + e;
         throw e;
       }
 
@@ -92,7 +102,7 @@ function(_, parser, tree2js, evaler) {
       return _.escape(text);
     },
     trim: function(text) {
-      return text.trim();
+      return text.replace(/^[ \t\n\v]*/, "").replace(/[ \n\t\v]*$/, "");
     }
   };
 
