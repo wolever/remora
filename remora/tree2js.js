@@ -29,7 +29,6 @@ function() {
         "  }\n" +
         "  return (function(__context) {\n" +
         "    var __write = function(val) { __context.write(val); }\n" +
-        "    var __pos = -1;\n" +
         "    with(__context.data) {\n"
       );
       self.walk(tree);
