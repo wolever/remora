@@ -10,6 +10,8 @@
         // Currently Chrome doesn't include a '.lineNumber' attribute on
         // exceptions and I can't be bothered to get it right now.
         e.lineNumber = e.lineNumber - offset;
+      } else {
+        e.lineNumber = -1;
       }
       e.source = js;
       throw e;

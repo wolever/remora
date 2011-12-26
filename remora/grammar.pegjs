@@ -6,6 +6,9 @@
      * there. However IE's |split| implementation is so broken that it was
      * enough to prevent it.
      */
+
+    if (pos < 0)
+      return { line: -1, column: -1, pos: pos };
     
     var line = 1;
     var column = 1;

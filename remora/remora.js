@@ -12,10 +12,8 @@ function(_, parser, tree2js, evaler) {
 
     self._setTemplateErrorLocation = function(e) {
       var templatePos = self._js.sourceLineToTemplatePos(e.lineNumber);
-      if (templatePos >= 0) {
-        var loc = self._parsed.computeLocation(templatePos);
-        e.templateLocation = loc;
-      }
+      var loc = self._parsed.computeLocation(templatePos);
+      e.templateLocation = loc;
     };
 
     self.compile = function() {
