@@ -86,10 +86,13 @@
     "};"
   ].join("\n") + "\n");
 
-  require(["underscore", "remora/remora", "./libs/jsDump-modified.js"],
-  function(_, remora) {
+  var template = null;
+
+  require(["underscore", "remora/remora", "remora/evaler", "./libs/jsDump-modified.js"],
+  function(_, remora, evaler) {
     window._ = _;
     window.remora = remora;
+    window.evaler = evaler;
 
     function errMessage(m) {
       return remora.render(
@@ -110,8 +113,6 @@
       check();
       setInterval(check, 200);
     };
-
-    var template = null;
 
     function reRender() {
       var output = $("#renderOutput");

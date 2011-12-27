@@ -104,7 +104,7 @@ function() {
       } else if (node.keyword == "elif") {
         self.emit("else if (" + node.expr + ") {\n");
       } else if (node.keyword == "else") {
-        self.emit(" else {\n");
+        self.emit("else {\n");
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
       }

@@ -1,5 +1,6 @@
 require(["remora/evaler", "underscore"],
 function(evaler, _) {
+
   module("evaler");
 
   test("simple eval", function() {
@@ -7,24 +8,22 @@ function(evaler, _) {
   });
 
   function getLineNumberInErrorTest(code) {
-    var newlines = "\n\n\n\n\n\n\n\n\n\n"; /* 10 '\n's */
+    var newlines = "1,\n\n\n\n\n\n\n\n\n\n"; /* 10 '\n's */
     newlines += newlines + newlines + newlines;
     newlines += "\n";
     return {
-      source: newlines + code,
+      source: newlines + code + ",\n\n\n2",
       lineNumber: 42
     };
   }
 
   function runLineNumberInErrorTest(suffix) {
-    if (!evaler.evalSync.supportsErrorLineNumbers)
-      return;
-
     var test = getLineNumberInErrorTest(suffix);
 
     try {
       evaler.evalSync(test.source + (suffix || ""));
     } catch (e) {
+      evaler.fixExceptionLineNumbers(e);
       equal(e.lineNumber, test.lineNumber);
       return;
     }

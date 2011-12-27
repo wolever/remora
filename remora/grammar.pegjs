@@ -180,6 +180,7 @@ _block_part
 
 _block_start
 = bl_options:_block_start_body ":" nl {
+  bl_options.pos = pos - 1;
   block = Node("controlblock", bl_options);
   block.body = DocNode();
 
@@ -207,6 +208,7 @@ _block_start_body
 
 _block_mid
 = bl_options:_block_mid_body _* ":" nl {
+  bl_options.pos = pos - 1;
   block = Node("controlblock", bl_options);
   block.body = DocNode();
 
