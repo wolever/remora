@@ -28,15 +28,13 @@ function() {
         "        func(obj[key], key, obj);\n" +
         "  }\n" +
         "  return (function(__context) {\n" +
-        "    var __write = function(val) { __context.write(val); }\n" +
-        "    var __pos = -1;\n" +
         "    with(__context.data) {\n"
       );
       self.walk(tree);
       self.emit(
         "    }\n" +
         "  });\n" +
-        "})();"
+        "})()"
       );
       var source = self._result.join("");
       var positionMappings = self._positionMappings;
@@ -69,6 +67,7 @@ function() {
     };
 
     self.notePosition = function(node, suffix) {
+      self.emit("/* " + node.pos + " */");
       self._positionMappings.push([self._resultLine, node.pos]);
     };
 
@@ -76,7 +75,7 @@ function() {
       for (var i = 0; i < node.children.length; i += 1) {
         var val = node.children[i];
         if (typeof val === "string") {
-          self.emit("__write(" + self.stringify(val) + ");\n");
+          self.emit("__context.write(" + self.stringify(val) + ");\n");
         } else {
           self.walk(val);
         }
@@ -84,7 +83,7 @@ function() {
     };
 
     self.walk_expression = function(node) {
-      self.emit("__write(");
+      self.emit("__context.write(");
       var filter_closeparens = "";
       for (var i = 0; i < node.filters.length; i += 1) {
         var filter = node.filters[i];
@@ -106,7 +105,7 @@ function() {
       } else if (node.keyword == "elif") {
         self.emit("else if (" + node.expr + ") {\n");
       } else if (node.keyword == "else") {
-        self.emit(" else {\n");
+        self.emit("else {\n");
       } else {
         throw Error("unknown control block keyword: " + node.keyword);
       }

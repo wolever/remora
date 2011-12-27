@@ -6,6 +6,9 @@
      * there. However IE's |split| implementation is so broken that it was
      * enough to prevent it.
      */
+
+    if (pos < 0)
+      return { line: -1, column: -1, pos: pos };
     
     var line = 1;
     var column = 1;
@@ -177,6 +180,7 @@ _block_part
 
 _block_start
 = bl_options:_block_start_body ":" nl {
+  bl_options.pos = pos - 1;
   block = Node("controlblock", bl_options);
   block.body = DocNode();
 
@@ -204,6 +208,7 @@ _block_start_body
 
 _block_mid
 = bl_options:_block_mid_body _* ":" nl {
+  bl_options.pos = pos - 1;
   block = Node("controlblock", bl_options);
   block.body = DocNode();
 

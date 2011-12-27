@@ -1,23 +1,41 @@
 require(["remora/evaler", "underscore"],
 function(evaler, _) {
+
   module("evaler");
+
   test("simple eval", function() {
-    equal(evaler.eval("1 + 2"), 3);
+    equal(evaler.evalSync("1 + 2"), 3);
   });
 
-  test("correct line numebers", function() {
-    var newlines = "\n\n\n\n\n\n\n\n\n\n";
+  function getLineNumberInErrorTest(code) {
+    var newlines = "1,\n\n\n\n\n\n\n\n\n\n"; /* 10 '\n's */
     newlines += newlines + newlines + newlines;
-    newlines += "\n\n";
+    newlines += "\n";
+    return {
+      source: newlines + code + ",\n\n\n2",
+      lineNumber: 42
+    };
+  }
+
+  function runLineNumberInErrorTest(suffix) {
+    var test = getLineNumberInErrorTest(suffix);
 
     try {
-      evaler.eval(newlines + "throw Error('ohno')");
+      evaler.evalSync(test.source + (suffix || ""));
     } catch (e) {
-      // Chrome doesn't include line numbers and I don't feel like faking it
-      // yet.
-      if (!e.lineNumber)
-        return;
-      equal(e.lineNumber, newlines.length + 1);
+      evaler.fixExceptionLineNumbers(e);
+      equal(e.lineNumber, test.lineNumber);
+      return;
     }
+    throw Error("expected error not raised!");
+  }
+
+  test("correct runtimme error line numbers", function() {
+    runLineNumberInErrorTest("(function() { throw Error('ohno'); })()");
   });
+
+  test("correct syntax error line numbers", function() {
+    runLineNumberInErrorTest("blah blah");
+  });
+
 });

@@ -263,6 +263,8 @@ function(remora, parser, _) {
     try {
       remora.render("1\n2\n${invalid expression}");
     } catch (e) {
+      if (e.templateLocation.line < 0)
+        return;
       equal(e.templateLocation.line, 3);
       return;
     }
@@ -273,6 +275,8 @@ function(remora, parser, _) {
     try {
       remora.render("1\n2\n3\n${null.foo}");
     } catch (e) {
+      if (e.templateLocation.line < 0)
+        return;
       equal(e.templateLocation.line, 4);
       return;
     }

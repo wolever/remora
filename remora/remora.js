@@ -12,25 +12,65 @@ function(_, parser, tree2js, evaler) {
 
     self._setTemplateErrorLocation = function(e) {
       var templatePos = self._js.sourceLineToTemplatePos(e.lineNumber);
-      if (templatePos >= 0) {
-        var loc = self._parsed.computeLocation(templatePos);
-        e.templateLocation = loc;
+      var loc = self._parsed.computeLocation(templatePos);
+      e.templateLocation = loc;
+    };
+
+    self._fixupRenderException = function(e) {
+      var templateFileName = "<remora template>";
+      evaler.fixExceptionLineNumbers(e, templateFileName);
+      if (e.hasIncorrectLineNumbers)
+        return;
+
+      var templatePos;
+      var templateLoc;
+      for (var i = 0; i < e.parsedStack.length; i += 1) {
+        var frame = e.parsedStack[i];
+        if (frame.fileName == templateFileName) {
+          templatePos = self._js.sourceLineToTemplatePos(frame.lineNumber);
+          templateLoc = self._parsed.computeLocation(templatePos);
+          frame.lineNumber = templateLoc.line;
+        }
       }
+
+      if (templateLoc)
+        e.stack = e.parsedStack.toStackString()
+
+      if (e.fileName == templateFileName) {
+        templatePos = self._js.sourceLineToTemplatePos(e.lineNumber);
+        templateLoc = self._parsed.computeLocation(templatePos);
+        e.generatedSourceLineNumber = e.lineNumber;
+        e.lineNumber = templateLoc.line;
+      }
+
+      if (templateLoc)
+        e.templateLocation = templateLoc;
+
     };
 
     self.compile = function() {
       self._parsed = parser.parse(self.text);
       self._js = self.converter.convert(self._parsed);
       try {
-        self._render = evaler.eval(self._js.source);
+        self._render = evaler.evalSync(self._js.source);
       } catch (e) {
-        var tmplLineMsg = "";
-        self._setTemplateErrorLocation(e);
-        if (e.templateLocation)
-          tmplLineMsg = " (template line " + e.templateLocation.line + ")";
-        e.message = "with generated JavaScript (see global __bad_script) line " +
-                    e.lineNumber + tmplLineMsg + ": " + e.message;
         /* global */ __bad_script = self._js.source;
+        /* global */ __eval_error = e;
+        self._fixupRenderException(e);
+        // The templateLocation *should* always exist...
+        var templateLocation = e.templateLocation || {};
+        if (e.hasIncorrectLineNumbers) {
+          e.message = (
+            "with generated JavaScript (see global __bad_script) line " +
+            e.lineNumber + " (note: template line number unavailable; try " +
+            "using Firefox): " + e.message
+          );
+        } else {
+          e.message = (
+            "with generated JavaScript (see global __bad_script). Error " +
+            "caused by template line " + e.lineNumber + ": " + e.message
+          );
+        }
         throw e;
       }
     };
@@ -42,9 +82,10 @@ function(_, parser, tree2js, evaler) {
       try {
         self._render(context);
       } catch (e) {
-        self._setTemplateErrorLocation(e);
+        /* global */ __render_error = e;
+        self._fixupRenderException(e);
         if (e.templateLocation)
-          e.message = "with template line " + e.templateLocation.line + ": " + e;
+          e.message = "template line " + e.templateLocation.line + ": " + e.message;
         throw e;
       }
 
