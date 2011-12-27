@@ -67,6 +67,7 @@ function() {
     };
 
     self.notePosition = function(node, suffix) {
+      self.emit("/* " + node.pos + " */");
       self._positionMappings.push([self._resultLine, node.pos]);
     };
 
