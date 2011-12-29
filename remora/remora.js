@@ -1,8 +1,8 @@
-define(["underscore", "remora/parser", "remora/tree2js", "remora/evaler"],
-function(_, parser, tree2js, evaler) {
+define(["underscore", "remora/parser", "remora/ast2js", "remora/evaler"],
+function(_, parser, ast2js, evaler) {
   function Template(text) {
     var self = {
-      converter: tree2js.Tree2JS()
+      converter: ast2js.AST2JS()
     };
 
     self.setText = function(text) {

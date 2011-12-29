@@ -1,6 +1,6 @@
 define(["underscore"],
 function() {
-  function Tree2JS() {
+  function AST2JS() {
     var self = {};
 
     self.stringify = function(val) {
@@ -124,6 +124,6 @@ function() {
   };
 
   return {
-    Tree2JS: Tree2JS
+    AST2JS: AST2JS
   };
 });
