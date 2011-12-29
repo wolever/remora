@@ -5,6 +5,11 @@
   <link rel="stylesheet" href="libs/bootstrap-1.4.0/bootstrap.min.css">
 
   <style>
+
+    .container {
+      margin-top: 18px;
+    }
+
     textarea {
       width: 100%;
       height: 200px;
@@ -46,10 +51,41 @@
 <body>
 <div class="container">
   <div class="row">
-    <h1>Remora Interactive</h1>
+
+    <div id="intro" class="span16">
+
+      <h1><tt>remora</tt> Interactive</h1>
+
+      <p><tt>remora</tt> is a JavaScript-based templating engine, fashioned after
+      Mako, which strives to be slightly less broken than the current breed of
+      JavaScript templating engines.</p>
+
+      <!-- <p><tt>remora</tt>'s number one goal is <strong>debuggability</strong>,
+      followed closely by <strong>practicality</strong>. Care has been taken to
+      ensure that all errors which occur while parsing and rendering the
+      template can be associated with the exact line that caused the error, and
+      no restrictions are placed on the type of code that is allowed in side
+      the template (although such restrictions could trivially be implemented
+      as a parse tree transformation, if that's your kind of thing).</p> -->
+
+      <p><tt>remora</tt> is currently <strong>very alpha</strong>, and far, far
+      from feature-complete or suitable for general use.</p>
+
+      <p><tt>remora</tt>'s source can be found on GitHub: <a
+      href="https://github.com/wolever/remora/">https://github.com/wolever/remora/</a>.</p>
+
+      <div class="unsupported-browser alert-message warning">
+        Your browser does not support line numbers in errors from
+        <tt>eval</tt>'d code, so <tt>remora</tt> will not be able to include
+        template line numbers in error messages. Until this is fixed, try using
+        Firefox, which does include line numbers in errors from <tt>eval</tt>'d
+        code.
+      </div>
+
+    </div>
 
     <div class="span8">
-      <h2>1. Write a Template</h2>
+      <h2>Write a Template</h2>
       <textarea id="templateTxt"></textarea>
 
       <div class="parse-error alert-message warning"></div>
@@ -65,7 +101,7 @@
     </div>
 
     <div class="span8">
-      <h2>2. Give it some data</h2>
+      <h2>Give it some data</h2>
       <textarea id="dataTxt"></textarea>
 
       <div class="render-error alert-message warning"></div>
@@ -134,6 +170,10 @@
     window.remora = remora;
     window.evaler = evaler;
 
+    if (!evaler.fixExceptionLineNumbers.supported) {
+      $(".unsupported-browser").show();
+    };
+
     function showError(selector, e) {
       $(selector)
         .show()
@@ -157,7 +197,7 @@
       $(".render-ok, .render-error").hide();
       if (!template)
         return;
-      
+
       var data;
       try {
         var js = "(function() {" + $("#dataTxt").val() + "})";
