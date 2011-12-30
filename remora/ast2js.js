@@ -70,7 +70,7 @@ define(["remora/astWalker"], function(astWalker) {
       self.notePosition(node);
       self.emit("__context.write(");
       var filter_closeparens = "";
-      for (var i = 0; i < node.filters.length; i += 1) {
+      for (var i = node.filters.length - 1; i >= 0; i -= 1) {
         var filter = node.filters[i];
         self.emit("__context.filter(" + self.stringify(filter) + ", ");
         filter_closeparens += ")";

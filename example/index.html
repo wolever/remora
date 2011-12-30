@@ -139,25 +139,25 @@
   });
 
   $("#templateTxt").text([
-    "<p>Hello, ${name}!</p>",
+    "<p>Hello, <a href='/external_redirect?${home_page|u}'>${name}!</a></p>",
     "% if friends.length > 0:",
     "  <ul>",
     "  % for friend in friends:",
-    "    <li>${friend.name}</li>",
+    "    <li>${friend.name} (unsafe: ${friend.name|n})</li>",
     "  % endfor",
     "  </ul>",
     "% else:",
-    "  <p>I'm sorry... You don't appear to have any friends.</p>",
-    "  <p>Can I be your friend?</p>",
+    "  <p>I'm sorry you don't friends. Can I be your friend?</p>",
     "% endif"
   ].join("\n") + "\n");
 
   $("#dataTxt").text([
     "return {",
     "  name: 'wolever',",
+    "  home_page: 'http://blog.codekills.net/',",
     "  friends: [",
     "    { name: 'Andrey' },",
-    "    { name: 'Alex' }",
+    "    { name: '<em>Alex</em>' }",
     "  ]",
     "};"
   ].join("\n") + "\n");

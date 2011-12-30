@@ -131,6 +131,13 @@ function(_, parser, ast2js, astTransforms, evaler) {
       var func = RenderContext.builtinFilters[filterName];
       if (!func)
         throw Error("no such filter: " + filterName);
+
+      // All built-in filters assume that the input is a string, so make sure
+      // that's true here. This shouldn't be done for user filters, though, as
+      // they might expect some other type of input.
+      if (typeof text !== "string")
+        text = "" + text;
+
       return func(text);
     };
 
@@ -141,12 +148,23 @@ function(_, parser, ast2js, astTransforms, evaler) {
     return self;
   };
 
+  var _xmlEscapes = {
+    "&" : "&amp;",
+    ">" : "&gt;", 
+    "<" : "&lt;", 
+    '"' : "&#34;",
+    "'" : "&#39;"
+  };
+  var _xmlEscapeRe = /[&<>'"]/g;
+
   RenderContext.builtinFilters = {
     u: function(text) {
       return escape(text);
     },
     h: function(text) {
-      return _.escape(text);
+      return text.replace(_xmlEscapeRe, function(chr) {
+        return _xmlEscapes[chr];
+      });
     },
     trim: function(text) {
       return text.replace(/^[ \t\n\v]*/, "").replace(/[ \n\t\v]*$/, "");

@@ -6,7 +6,14 @@ function(remora, parser, _) {
       name: "defaultFilters are added to expressions",
       input: "${foo}",
       expected_renders: [
-        { foo: "&<>'\"", __expected: "&amp;&lt;&gt;&#x27;&quot;" }
+        { foo: "a&<>'\"b", __expected: "a&amp;&lt;&gt;&#39;&#34;b" }
+      ]
+    },
+    {
+      name: "defaultFilters are applied after existing filters",
+      input: "${foo|u}",
+      expected_renders: [
+        { foo: ":>", __expected: "%3A%3E" }
       ]
     },
 
