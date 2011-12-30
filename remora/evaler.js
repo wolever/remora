@@ -90,7 +90,7 @@
 
     for (var i = 0; i < stack.length; i += 1) {
       var frame = stack[i];
-      if (frame.fileName = self.fileName && frame.lineNumber > self.evaledCodeOffset) {
+      if (frame.fileName == self.fileName && frame.lineNumber > self.evaledCodeOffset) {
         frame.fileName = evaledCodeFileName;
         frame.lineNumber -= self.evaledCodeOffset;
       }

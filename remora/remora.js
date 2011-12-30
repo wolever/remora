@@ -1,19 +1,16 @@
-define(["underscore", "remora/parser", "remora/ast2js", "remora/evaler"],
-function(_, parser, ast2js, evaler) {
-  function Template(text) {
-    var self = {
-      converter: ast2js.AST2JS()
-    };
+define(["underscore", "remora/parser", "remora/ast2js", "remora/astTransforms", "remora/evaler"],
+function(_, parser, ast2js, astTransforms, evaler) {
+  function Template(text, options) {
+    var self = _.extend({
+      converter: ast2js.AST2JS(),
+      defaultFilters: ["h"]
+    }, options || {});
+
+    self.transforms = self.transforms || astTransforms.ASTTransforms(self);
 
     self.setText = function(text) {
       self.text = "" + text;
       self.compile();
-    };
-
-    self._setTemplateErrorLocation = function(e) {
-      var templatePos = self._js.sourceLineToTemplatePos(e.lineNumber);
-      var loc = self._parsed.computeLocation(templatePos);
-      e.templateLocation = loc;
     };
 
     self._fixupRenderException = function(e) {
@@ -23,6 +20,7 @@ function(_, parser, ast2js, evaler) {
         return;
 
       var templatePos;
+      var firstTemplateLoc;
       var templateLoc;
       for (var i = 0; i < e.parsedStack.length; i += 1) {
         var frame = e.parsedStack[i];
@@ -30,6 +28,8 @@ function(_, parser, ast2js, evaler) {
           templatePos = self._js.sourceLineToTemplatePos(frame.lineNumber);
           templateLoc = self._parsed.computeLocation(templatePos);
           frame.lineNumber = templateLoc.line;
+          if (!firstTemplateLoc)
+            firstTemplateLoc = templateLoc;
         }
       }
 
@@ -41,15 +41,18 @@ function(_, parser, ast2js, evaler) {
         templateLoc = self._parsed.computeLocation(templatePos);
         e.generatedSourceLineNumber = e.lineNumber;
         e.lineNumber = templateLoc.line;
+        if (!firstTemplateLoc)
+          firstTemplateLoc = templateLoc;
       }
 
       if (templateLoc)
-        e.templateLocation = templateLoc;
+        e.templateLocation = firstTemplateLoc;
 
     };
 
     self.compile = function() {
       self._parsed = parser.parse(self.text);
+      self.transforms.walk(self._parsed);
       self._js = self.converter.convert(self._parsed);
       try {
         self._render = evaler.evalSync(self._js.source);
@@ -121,10 +124,13 @@ function(_, parser, ast2js, evaler) {
       data: {}
     }, options);
 
-    self.filter = function(filter_name, text) {
-      var func = RenderContext.defaultFilters[filter_name];
+    self.filter = function(filterName, text) {
+      if (filterName === "n")
+        return text;
+
+      var func = RenderContext.builtinFilters[filterName];
       if (!func)
-        throw Error("no such filter: " + filter_name);
+        throw Error("no such filter: " + filterName);
       return func(text);
     };
 
@@ -135,7 +141,7 @@ function(_, parser, ast2js, evaler) {
     return self;
   };
 
-  RenderContext.defaultFilters = {
+  RenderContext.builtinFilters = {
     u: function(text) {
       return escape(text);
     },

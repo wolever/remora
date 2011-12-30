@@ -259,7 +259,9 @@ function(remora, parser, _) {
       var rname = expected_render.__name;
       var name = testcase.name + (rname? " - " + rname : "");
       test(name, function() {
-        var template = remora.Template(testcase.input);
+        var template = remora.Template(testcase.input, {
+          "defaultFilters": []
+        });
         var actual = template.render(expected_render);
         equal(actual, expected_render.__expected);
       });
