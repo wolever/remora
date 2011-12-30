@@ -1,7 +1,6 @@
-define(["underscore"],
-function() {
-  function Tree2JS() {
-    var self = {};
+define(["remora/astWalker"], function(astWalker) {
+  function AST2JS() {
+    var self = astWalker.ASTWalker();
 
     self.stringify = function(val) {
       return JSON.stringify(val);
@@ -57,35 +56,21 @@ function() {
       return result;
     };
 
-    self.walk = function(node) {
-      var handler = self["walk_" + node.type];
-      if (!handler)
-        throw Error("unknown node type: " + node.type);
-
-      self.notePosition(node);
-      handler(node);
-    };
-
-    self.notePosition = function(node, suffix) {
+    self.notePosition = function(node) {
       self.emit("/* " + node.pos + " */");
       self._positionMappings.push([self._resultLine, node.pos]);
     };
 
-    self.walk_doc = function(node) {
-      for (var i = 0; i < node.children.length; i += 1) {
-        var val = node.children[i];
-        if (typeof val === "string") {
-          self.emit("__context.write(" + self.stringify(val) + ");\n");
-        } else {
-          self.walk(val);
-        }
-      }
+    self.walk_string = function(node) {
+      self.notePosition(node);
+      self.emit("__context.write(" + self.stringify(node.value) + ");\n");
     };
 
     self.walk_expression = function(node) {
+      self.notePosition(node);
       self.emit("__context.write(");
       var filter_closeparens = "";
-      for (var i = 0; i < node.filters.length; i += 1) {
+      for (var i = node.filters.length - 1; i >= 0; i -= 1) {
         var filter = node.filters[i];
         self.emit("__context.filter(" + self.stringify(filter) + ", ");
         filter_closeparens += ")";
@@ -124,6 +109,6 @@ function() {
   };
 
   return {
-    Tree2JS: Tree2JS
+    AST2JS: AST2JS
   };
 });
