@@ -36,7 +36,8 @@
   function Node(type, options) {
     options = options || {};
     options.type = type;
-    options.pos = options.pos || pos;
+    if (options.pos === undefined)
+      options.pos = pos;
     return options;
   }
 
@@ -112,7 +113,10 @@ _doc
       last_child.value += v;
       v = undefined;
     } else {
-      v = Node("string", { value: v });
+      v = Node("string", {
+        value: v,
+        pos: pos - 1
+      });
     }
   }
 

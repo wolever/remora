@@ -1,6 +1,6 @@
-define(function() {
+define(["remora/astWalker"], function(astWalker) {
   function AST2JS() {
-    var self = {};
+    var self = astWalker.ASTWalker();
 
     self.stringify = function(val) {
       return JSON.stringify(val);
@@ -56,30 +56,18 @@ define(function() {
       return result;
     };
 
-    self.walk = function(node) {
-      var handler = self["walk_" + node.type];
-      if (!handler)
-        throw Error("unknown node type: " + node.type);
-
-      self.notePosition(node);
-      handler(node);
-    };
-
-    self.notePosition = function(node, suffix) {
+    self.notePosition = function(node) {
       self.emit("/* " + node.pos + " */");
       self._positionMappings.push([self._resultLine, node.pos]);
     };
 
-    self.walk_doc = function(node) {
-      for (var i = 0; i < node.children.length; i += 1)
-        self.walk(node.children[i]);
-    };
-
     self.walk_string = function(node) {
+      self.notePosition(node);
       self.emit("__context.write(" + self.stringify(node.value) + ");\n");
     };
 
     self.walk_expression = function(node) {
+      self.notePosition(node);
       self.emit("__context.write(");
       var filter_closeparens = "";
       for (var i = 0; i < node.filters.length; i += 1) {
