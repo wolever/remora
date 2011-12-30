@@ -1,8 +1,15 @@
 require(["remora/remora", "remora/parser", "underscore"],
 function(remora, parser, _) {
 
+  function str(x) {
+    return { type: "string", value: x };
+  }
+
   function _copyAST(actual, expected) {
     if (typeof actual !== "object")
+      return actual;
+
+    if (typeof expected !== "object")
       return actual;
 
     var copy = new expected.constructor();
@@ -28,13 +35,13 @@ function(remora, parser, _) {
       name: "expr simple",
       input: "a ${foo + bar} b",
       expected_ast: [
-        "a ",
+        str("a "),
         {
           type: "expression",
           expr: "foo + bar",
           filters: []
         },
-        " b"
+        str(" b")
       ],
       expected_renders: [
         { foo: 20, bar: 22, __expected: "a 42 b"}
@@ -45,19 +52,19 @@ function(remora, parser, _) {
       name: "expr multiple",
       input: "a ${x} b ${y} c",
       expected_ast: [
-        "a ",
+        str("a "),
         {
           type: "expression",
           expr: "x",
           filters: []
         },
-        " b ",
+        str(" b "),
         {
           type: "expression",
           expr: "y",
           filters: []
         },
-        " c"
+        str(" c")
       ],
       expected_renders: [
         { x: "1", y: "2", __expected: "a 1 b 2 c" }
@@ -93,7 +100,7 @@ function(remora, parser, _) {
     {
       name: "escaping %s",
       input: "%% foo %\nbar %",
-      expected_ast: ["% foo %\nbar %"],
+      expected_ast: [str("% foo %\nbar %")],
       expected_renders: [
         { __expected: "% foo %\nbar %" }
       ]
@@ -114,13 +121,13 @@ function(remora, parser, _) {
         body: {
           type: "doc",
           children: [
-            "  num: ",
+            str("  num: "),
             {
               type: "expression",
               expr: "foo",
               filters: []
             },
-            "\n"
+            str("\n")
           ]
         }
       }],
@@ -159,7 +166,7 @@ function(remora, parser, _) {
               expr: "baz",
               body: {
                 type: "doc",
-                children: ["    stuff!\n"]
+                children: [str("    stuff!\n")]
               }
             }
           ]
@@ -190,7 +197,7 @@ function(remora, parser, _) {
         expr: "foo",
         body: {
           type: "doc",
-          children: ["  foo\n"]
+          children: [str("  foo\n")]
         },
         sub_blocks: [
           {
@@ -199,7 +206,7 @@ function(remora, parser, _) {
             expr: "bar",
             body: {
               type: "doc",
-              children: ["  bar\n"]
+              children: [str("  bar\n")]
             }
           },
           {
@@ -207,7 +214,7 @@ function(remora, parser, _) {
             keyword: "else",
             body: {
               type: "doc",
-              children: ["  neither\n"]
+              children: [str("  neither\n")]
             }
           }
         ]

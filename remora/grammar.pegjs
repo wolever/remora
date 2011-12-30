@@ -75,28 +75,9 @@
     if (d.added_nl) {
       delete d.added_nl;
       var last_child = d.children[d.children.length - 1];
-      if (typeof last_child === "string")
-        d.children[d.children.length - 1] = last_child.slice(0, -1);
+      if ((last_child || {}).type === "string")
+        last_child.value = last_child.value.slice(0, -1)
     }
-
-    if (d.children.length < 2)
-      return;
-
-    var folded_children = [];
-    var last = d.children[0];
-    for (var i = 1; i < d.children.length; i += 1) {
-      var cur = d.children[i];
-      if (typeof last === "string" && typeof cur === "string") {
-        last += cur;
-        continue;
-      }
-      if (!(typeof last === "string" && last.length == 0))
-        folded_children.push(last);
-      last = cur;
-    }
-    if (!(typeof last === "string" && last.length == 0))
-      folded_children.push(last);
-    d.children = folded_children;
   }
 
   var doc_stack = [];
@@ -125,8 +106,20 @@ doc
 
 _doc
 = v:(markup / nl / .) {
-  if (v !== undefined)
+  if (typeof v === "string") {
+    var last_child = cur_doc.children[cur_doc.children.length - 1] || {};
+    if (last_child.type === "string") {
+      last_child.value += v;
+      v = undefined;
+    } else {
+      v = Node("string", { value: v });
+    }
+  }
+
+  if (v !== undefined) {
     cur_doc.children.push(v);
+  }
+
   return cur_doc;
 }
 

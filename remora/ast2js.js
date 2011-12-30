@@ -1,5 +1,4 @@
-define(["underscore"],
-function() {
+define(function() {
   function AST2JS() {
     var self = {};
 
@@ -72,14 +71,12 @@ function() {
     };
 
     self.walk_doc = function(node) {
-      for (var i = 0; i < node.children.length; i += 1) {
-        var val = node.children[i];
-        if (typeof val === "string") {
-          self.emit("__context.write(" + self.stringify(val) + ");\n");
-        } else {
-          self.walk(val);
-        }
-      }
+      for (var i = 0; i < node.children.length; i += 1)
+        self.walk(node.children[i]);
+    };
+
+    self.walk_string = function(node) {
+      self.emit("__context.write(" + self.stringify(node.value) + ");\n");
     };
 
     self.walk_expression = function(node) {
