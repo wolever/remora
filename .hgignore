@@ -14,4 +14,4 @@ tags
 *.dump
 env/
 *egg-info*
-node_modules
+node_modules/

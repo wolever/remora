@@ -9,11 +9,10 @@
     },
     "keywords": ["templating", "template"],
    "dependencies": {
-       "pegjs": "== 0.6.2"
+       "pegjs": "== 0.6.2",
     },
     "devDependencies": {
-        "qunit": "== 0.2.9",
-        "requirejs": "== 1.0.3"
+        "qunit": "== 0.2.9"
     },
     "licenses": [
         {
