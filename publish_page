@@ -1,0 +1,11 @@
+#!/bin/bash
+
+IFS="`printf "\n\t"`"
+set -eu
+cd "`dirname "$0"`"
+
+hg co gh-pages
+hg merge master
+hg ci -m "Merge master -> gh-pages"
+hg co master
+hg push
