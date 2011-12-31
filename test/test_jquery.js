@@ -47,4 +47,11 @@ function(remora) {
     renderedEqual(newElem.html());
   });
 
+  test("re-rendering a .rendered element", function() {
+    $("#template").remora("render", { data: { name: "first render" }});
+    $("#template").remora("render", { data: { name: "second render" }});
+    $("#template").remora("render", { data: { name: "world" }});
+    renderedEqual($("#template").html());
+  });
+
 });
