@@ -106,10 +106,6 @@ function(_, parser, ast2js, astTransforms, evaler) {
     if (obj === null || obj === undefined)
       return Template("" + obj);
 
-    // When passed a jQuery selector, use the first item.
-    if (obj.jquery)
-      obj = obj[0];
-
     // This is how jQuery detects DOM nodes, and it seems reasonable... So I'm
     // going to copy it.
     if (obj.nodeType)
