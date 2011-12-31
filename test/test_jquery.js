@@ -40,8 +40,8 @@ function(remora) {
       "id": "template",
       "type": undefined,
       "data-foo": "bar"
-    }, function(prop, val) {
-      equal(newElem.prop(prop), val, "prop " + prop + " doesn't match");
+    }, function(attr, val) {
+      equal(newElem.attr(attr), val, "attr " + attr + " doesn't match");
     });
     equal(newElem[0].tagName.toLowerCase(), "div");
     renderedEqual(newElem.html());
