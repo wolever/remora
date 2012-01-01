@@ -32,24 +32,29 @@ var methods = {
     return template;
   },
 
-  render: function(elem, options) {
+  prepare: function(elem, options) {
     var template = elem.data("remora:template");
-    if (!template) {
-      var oldElem = elem[0];
-      var newElem = document.createElement(options.tag);
-      for (var i = 0; i < oldElem.attributes.length; i += 1) {
-        var attr = oldElem.attributes[i];
-        if (options.ignoreAttributes[attr.name])
-          continue;
-        newElem.attributes.setNamedItemNS(attr.cloneNode(false));
-      }
-      oldElem.parentNode.replaceChild(newElem, oldElem);
-      template = methods.template(elem, options, $(newElem));
-      elem = $(newElem);
-    }
+    if (template)
+      return elem;
 
+    var oldElem = elem[0];
+    var newElem = document.createElement(options.tag);
+    for (var i = 0; i < oldElem.attributes.length; i += 1) {
+      var attr = oldElem.attributes[i];
+      if (options.ignoreAttributes[attr.name])
+        continue;
+      newElem.attributes.setNamedItemNS(attr.cloneNode(false));
+    }
+    oldElem.parentNode.replaceChild(newElem, oldElem);
+    template = methods.template(elem, options, $(newElem));
+    return $(newElem);
+  },
+
+  render: function(elem, options) {
+    elem = methods.prepare(elem, options);
+    var template = methods.template(elem, options);
     elem[0].innerHTML = template.render(options.data);
-    return $(elem);
+    return elem;
   }
 };
 

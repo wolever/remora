@@ -35,16 +35,22 @@ function(remora) {
   });
 
   test("using .render to replace an element", function() {
-    var newElem = $("#template").remora("render", { data: { name: "world" }});
+    var elem = $("#template").remora("render", { data: { name: "world" }});
     $.each({
       "id": "template",
       "type": undefined,
       "data-foo": "bar"
     }, function(attr, val) {
-      equal(newElem.attr(attr), val, "attr " + attr + " doesn't match");
+      equal(elem.attr(attr), val, "attr " + attr + " doesn't match");
     });
-    equal(newElem[0].tagName.toLowerCase(), "div");
-    renderedEqual(newElem.html());
+    equal(elem[0].tagName.toLowerCase(), "div");
+    renderedEqual(elem.html());
+  });
+
+  test("preparing with .prepare", function() {
+    var elem = $("#template").remora("prepare");
+    equal(elem[0].tagName.toLowerCase(), "div");
+    equal(elem.html(), "");
   });
 
   test("re-rendering a .rendered element", function() {
