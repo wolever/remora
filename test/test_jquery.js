@@ -15,7 +15,7 @@ function(remora) {
       $("#qunit-fixture").html([
         '<div>first</div>',
         '<div>first</div>',
-        '<script id="template" type="text/remora" data-foo="bar">',
+        '<script id="template" type="text/x-remora" data-foo="bar">',
           'Hello, <em>${name}</em>!',
         '</script>',
         '<div>last</div>'
@@ -35,7 +35,7 @@ function(remora) {
   });
 
   test("using .render to replace an element", function() {
-    var elem = $("#template").remora("render", { data: { name: "world" }});
+    var elem = $("#template").remora("render", { name: "world" });
     $.each({
       "id": "template",
       "type": undefined,
@@ -54,9 +54,9 @@ function(remora) {
   });
 
   test("re-rendering a .rendered element", function() {
-    $("#template").remora("render", { data: { name: "first render" }});
-    $("#template").remora("render", { data: { name: "second render" }});
-    $("#template").remora("render", { data: { name: "world" }});
+    $("#template").remora("render", { name: "first render" });
+    $("#template").remora("render", { name: "second render" });
+    $("#template").remora("render", { name: "world" });
     renderedEqual($("#template").html());
   });
 

@@ -308,7 +308,7 @@ function(remora, parser, _) {
     function getScriptTemplateElem() {
       var parent = document.createElement("div");
       parent.innerHTML = ([
-        "<script type='text/remora-template'>",
+        "<script type='text/x-remora'>",
         "&amp; ${foo} <div>",
         "</script>"
       ].join(""));

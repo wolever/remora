@@ -1,20 +1,11 @@
 (function($) {
-/*
-$(...).remora("render", options):
-  remora.Template($(...)[0].innerHTML).render(options.data), caching the
-  rendered template.
-
-$(...).remora("inplace", options):
-  Replaces $(...)[0] with a <div> containing the contents of $(...)[0] rendered
-  with options.data. The content of the <div> will be updated on future calls.
-*/
 
 var remora = window.remora;
 
 var methods = {
   options: function(elem, options) {
     return $.extend({
-      data: {},
+      data: undefined,
       templateOptions: {},
       tag: "div",
       ignoreAttributes: {
@@ -33,8 +24,7 @@ var methods = {
   },
 
   prepare: function(elem, options) {
-    var template = elem.data("remora:template");
-    if (template)
+    if (elem.data("remora:has-been-prepared"))
       return elem;
 
     var oldElem = elem[0];
@@ -47,6 +37,7 @@ var methods = {
     }
     oldElem.parentNode.replaceChild(newElem, oldElem);
     template = methods.template(elem, options, $(newElem));
+    $(newElem).data("remora:has-been-prepared", true);
     return $(newElem);
   },
 
