@@ -1,2 +1,3 @@
-- Auto-escaping options
-- Helpful errors when JS expressions inside templates throw errors
+- Implement 'for' loops in templates using real loops instead of a magic
+  __foreach function (so that 'break' and 'return' will work as expected).
+- Implement '<% %>' blocks.
