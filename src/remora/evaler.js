@@ -1,4 +1,6 @@
-(function() {
+goog.provide("remora.evaler");
+
+remora.evaler = (function() {
   // Note: because not all environments support line numbers in errors, it
   // might be useful to add an 'evalAsync' function at some point in the future
   // which will evaluate the code by appending a "<script>" element to the
@@ -14,7 +16,7 @@
   }
 
   var stackLineRE = /^(.*)@((http|file).*):([\d]*)$/
-  function parseStackTrace(stack) {
+  var parseStackTrace = function(stack) {
     if (!stack)
       return null;
 
@@ -58,7 +60,7 @@
     return result.join("\n") + "\n";
   }
 
-  function evalSync(js) {
+  var evalSync = function(js) {
     try {
       // The parens are added around the JS to ensure that it is a simple
       // expression and not an arbitrary block of code. This will make the
@@ -71,7 +73,7 @@
     }
   };
 
-  function fixExceptionLineNumbers(e, evaledCodeFileName) {
+  var fixExceptionLineNumbers = function(e, evaledCodeFileName) {
     var self = fixExceptionLineNumbers;
     evaledCodeFileName = evaledCodeFileName || "(evalered)";
 
@@ -143,9 +145,10 @@
     }
   }
 
-  define({
+  return {
     parseStackTrace: parseStackTrace,
     evalSync: evalSync,
     fixExceptionLineNumbers: fixExceptionLineNumbers
-  });
+  };
+
 })();

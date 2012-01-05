@@ -2,7 +2,7 @@
 <head>
   <title>Remora Interactive</title>
 
-  <link rel="stylesheet" href="libs/bootstrap-1.4.0/bootstrap.min.css">
+  <link rel="stylesheet" href="../.libs/bootstrap-1.4.0/bootstrap.min.css">
 
   <style>
 
@@ -119,24 +119,20 @@
   </div>
 </div>
 
-<script src="libs/jquery-1.7.1.min.js"></script>
-<script src="libs/bootstrap-1.4.0/bootstrap-tabs.js"></script>
-<script data-main="../" src="../libs/require-1.0.2/require.js"></script>
+<script src="../.libs/jquery-1.7.1.min.js"></script>
+<script src="../.libs/bootstrap-1.4.0/bootstrap-tabs.js"></script>
+<script src="../.libs/jsDump-modified.js"></script>
+<script src="../.libs/underscore-1.2.3.js"></script>
+
+<script src="../src/browser/base.js"></script>
+<script>
+  goog.require("remora");
+</script>
 
 <script>
   function log() {
     console.log.apply(console, arguments);
   }
-
-  requirejs.config({
-    urlArgs: "?_cachebuster=" + (+new Date()),
-    paths: {
-      "text": "libs/require-1.0.2/text",
-      "underscore": "libs/underscore-1.2.3",
-      "PEG": "libs/peg-0.6.2-amd",
-      "remora/parser": "remora/parser.debug"
-    }
-  });
 
   $("#templateTxt").text([
     "<p>Hello, <a href='/external_redirect?${home_page|u}'>${name}!</a></p>",
@@ -164,82 +160,75 @@
 
   var template = null;
 
-  require(["underscore", "remora/remora", "remora/evaler", "./libs/jsDump-modified.js"],
-  function(_, remora, evaler) {
-    window._ = _;
-    window.remora = remora;
-    window.evaler = evaler;
+  if (!remora.evaler.fixExceptionLineNumbers.supported) {
+    $(".unsupported-browser").show();
+  };
 
-    if (!evaler.fixExceptionLineNumbers.supported) {
-      $(".unsupported-browser").show();
+  function showError(selector, e) {
+    $(selector)
+      .show()
+      .text(e.message);
+  }
+
+  function onChange(elem, func) {
+    var lastVal = undefined;
+    function check() {
+      var curVal = elem.val();
+      if (lastVal != curVal) {
+        func(curVal);
+        lastVal = curVal;
+      }
+    }
+    check();
+    setInterval(check, 200);
+  };
+
+  function reRender() {
+    $(".render-ok, .render-error").hide();
+    if (!template)
+      return;
+
+    var data;
+    try {
+      var js = "(function() {" + $("#dataTxt").val() + "})";
+      data = eval(js)();
+    } catch (e) {
+      showError(".render-error", e);
+      return;
     };
 
-    function showError(selector, e) {
-      $(selector)
-        .show()
-        .text(e.message);
+    var rendered;
+    try {
+      rendered = template.render(data);
+    } catch (e) {
+      showError(".render-error", e);
+      return;
     }
 
-    function onChange(elem, func) {
-      var lastVal = undefined;
-      function check() {
-        var curVal = elem.val();
-        if (lastVal != curVal) {
-          func(curVal);
-          lastVal = curVal;
-        }
-      }
-      check();
-      setInterval(check, 200);
-    };
+    $(".render-ok").show();
+    $("#rendered pre").text(rendered);
+    $("#displayed").html(rendered);
+  };
 
-    function reRender() {
-      $(".render-ok, .render-error").hide();
-      if (!template)
-        return;
+  onChange($("#templateTxt"), function(text) {
+    $(".parse-ok, .parse-error").hide();
 
-      var data;
-      try {
-        var js = "(function() {" + $("#dataTxt").val() + "})";
-        data = eval(js)();
-      } catch (e) {
-        showError(".render-error", e);
-        return;
-      };
+    try {
+      template = remora.Template(text);
+    } catch (e) {
+      template = null;
+      window.e = e;
+      showError(".parse-error", e);
+      return;
+    }
 
-      var rendered;
-      try {
-        rendered = template.render(data);
-      } catch (e) {
-        showError(".render-error", e);
-        return;
-      }
-
-      $(".render-ok").show();
-      $("#rendered pre").text(rendered);
-      $("#displayed").html(rendered);
-    };
-
-    onChange($("#templateTxt"), function(text) {
-      $(".parse-ok, .parse-error").hide();
-
-      try {
-        template = remora.Template(text);
-      } catch (e) {
-        template = null;
-        window.e = e;
-        showError(".parse-error", e);
-        return;
-      }
-
-      $(".parse-ok").show();
-      $("#ast pre").text(jsDump.parse(template._parsed));
-      $("#javascript pre").text(template._js.source);
-      reRender();
-    });
-
-    onChange($("#dataTxt"), reRender);
+    $(".parse-ok").show();
+    $("#ast pre").text(jsDump.parse(template._parsed));
+    $("#javascript pre").text(template._js.source);
+    reRender();
   });
+
+  onChange($("#dataTxt"), reRender);
 
 </script>
 

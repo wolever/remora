@@ -15,3 +15,4 @@ tags
 env/
 *egg-info*
 node_modules/
+build/
