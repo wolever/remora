@@ -49,7 +49,7 @@ Syntax
 ``remora``'s syntax is as close as possible to `Mako's syntax`__, so Mako's
 documentation can be used to fill in the details.
 
-.. __ http://www.makotemplates.org/docs/syntax.html#
+.. __: http://www.makotemplates.org/docs/syntax.html#
 
 Loading
 -------
