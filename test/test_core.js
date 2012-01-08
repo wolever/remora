@@ -305,28 +305,39 @@ _.each(testcases, function(testcase) {
   });
 });
 
-test("includes line number on JS syntax errors", function() {
-  try {
-    remora.render("1\n2\n${invalid expression}");
-  } catch (e) {
-    if (e.templateLocation.line < 0)
-      return;
-    equal(e.templateLocation.line, 3);
-    return;
-  }
-  throw Error("expected error not raised!");
-});
+var line_numbers_supported = remora.evaler.fixExceptionLineNumbers.supported;
+var line_error_testcases = (!line_numbers_supported)? [] : [
+  {
+    name: "includes line number on JS syntax errors",
+    text: "1\n2\n${invalid expression}",
+    expected_line_number: 3
+  },
 
-test("includes line number on runtime errors", function() {
-  try {
-    remora.render("1\n2\n3\n${null.foo}");
-  } catch (e) {
-    if (e.templateLocation.line < 0)
-      return;
-    equal(e.templateLocation.line, 4);
-    return;
+  {
+    name: "includes line number on runtime errors",
+    text: "1\n2\n3\n${null()}",
+    expected_line_number: 4
+  },
+
+  /*
+  {
+    name: "line numbers are correct for code blocks",
+    text: "<%\n2;\nfoo();\n4;\n%>",
+    expected_line_number: 3
   }
-  throw Error("expected error not raised!");
+  */
+];
+
+_.each(line_error_testcases, function(testcase) {
+  test(testcase.name, function() {
+    try {
+      remora.render(testcase.text);
+    } catch (e) {
+      equal(e.templateLocation.line, testcase.expected_line_number);
+      return;
+    }
+    throw Error("expected error not raised!");
+  });
 });
 
 QUnit.module("remora.render");

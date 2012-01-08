@@ -52,6 +52,7 @@ remora.Template = function(text, options) {
   self._fixupRenderException = function(e) {
     var templateFileName = "<remora template>";
     remora.evaler.fixExceptionLineNumbers(e, templateFileName);
+    e.templateLocation = {};
     if (e.hasIncorrectLineNumbers)
       return;
 
@@ -96,8 +97,6 @@ remora.Template = function(text, options) {
       goog.global.__bad_script = self._js.source;
       goog.global.__eval_error = e;
       self._fixupRenderException(e);
-      // The templateLocation *should* always exist...
-      var templateLocation = e.templateLocation || {};
       if (e.hasIncorrectLineNumbers) {
         e.message = (
           "with generated JavaScript (see global __bad_script) line " +
@@ -107,7 +106,8 @@ remora.Template = function(text, options) {
       } else {
         e.message = (
           "with generated JavaScript (see global __bad_script). Error " +
-          "caused by template line " + e.lineNumber + ": " + e.message
+          "caused by template line " + e.templateLocation.line + ": " +
+          e.message
         );
       }
       throw e;
@@ -123,8 +123,10 @@ remora.Template = function(text, options) {
     } catch (e) {
       goog.global.__render_error = e;
       self._fixupRenderException(e);
-      if (e.templateLocation)
-        e.message = "template line " + e.templateLocation.line + ": " + e.message;
+      if (e.templateLocation.line)
+        e.message = (
+          "template line " + e.templateLocation.line + ": " + e.message
+        );
       throw e;
     }
 
