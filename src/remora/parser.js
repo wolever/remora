@@ -329,6 +329,7 @@ remora.parser = (function(){
         var result2 = result1 !== null
           ? (function(body) {
             return Node("expression", {
+              pos: pos - 1,
               expr: body.expr,
               filters: body.filter
             });
@@ -1467,6 +1468,7 @@ remora.parser = (function(){
         var result2 = result1 !== null
           ? (function(body) {
             return Node("codeblock", {
+              pos: pos - 2,
               body: body.join("")
             });
           })(result1[1])
@@ -1731,17 +1733,13 @@ remora.parser = (function(){
       
     function computeLocation(pos) {
       
-      /*
+      // Note: this differs slightly from PegJS's 'compute location' function
       
-       * The first idea was to use |String.split| to break the input up to the
+      // as it considers newlines to be part of the line, not part of the next
       
-       * error position along newlines and derive the line and column from
+      // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
       
-       * there. However IE's |split| implementation is so broken that it was
-      
-       * enough to prevent it.
-      
-       */
+      // '\n') will return `1`, not `2`).
       
   
       
@@ -1749,47 +1747,57 @@ remora.parser = (function(){
       
         return { line: -1, column: -1, pos: pos };
       
+      if (pos > input.length)
       
+        pos = input.length;
+      
+  
       
       var line = 1;
       
       var column = 1;
       
-      var seenCR = false;
+      var seenNL = false;
       
+  
       
+      for (var i = 0; i < pos; i += 1) {
       
-      for (var i = 0; i < pos; i++) {
+        if (seenNL) {
       
-        var ch = input.charAt(i);
+          line += 1;
       
-        if (ch === '\n') {
+          column = 0;
       
-          if (!seenCR) { line++; }
+          seenNL = false;
       
-          column = 1;
+        }
       
-          seenCR = false;
+        column += 1;
       
-        } else if (ch === '\r' | ch === '\u2028' || ch === '\u2029') {
+  
       
-          line++;
+        switch (input.charAt(i)) {
       
-          column = 1;
+          case '\r':
       
-          seenCR = true;
+          case '\u2028':
       
-        } else {
+          case '\u2029':
       
-          column++;
+            if (i + 1 < pos && input.charAt(i + 1) === '\n')
       
-          seenCR = false;
+              continue;
+      
+          case '\n':
+      
+            seenNL = true;
       
         }
       
       }
       
-      
+  
       
       return { line: line, column: column, pos: pos };
       
@@ -1805,7 +1813,7 @@ remora.parser = (function(){
       
       if (options.pos === undefined)
       
-        options.pos = pos;
+        throw Error("Node " + type + " doesn't define a 'pos'!");
       
       return options;
       
@@ -1866,6 +1874,8 @@ remora.parser = (function(){
     function DocNode() {
       
       return Node("doc", {
+      
+        pos: pos,
       
         children: []
       

@@ -319,13 +319,11 @@ var line_error_testcases = (!line_numbers_supported)? [] : [
     expected_line_number: 4
   },
 
-  /*
   {
     name: "line numbers are correct for code blocks",
     text: "<%\n2;\nfoo();\n4;\n%>",
     expected_line_number: 3
   }
-  */
 ];
 
 _.each(line_error_testcases, function(testcase) {

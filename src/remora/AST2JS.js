@@ -46,8 +46,9 @@ remora.AST2JS = function() {
         var pos = -1;
         for (var i = 0; i < positionMappings.length; i += 1) {
           var mapping = positionMappings[i];
-          if (sourceLine >= mapping[0])
-            pos = mapping[1];
+          if (sourceLine < mapping[0])
+            break;
+          pos = mapping[1];
         }
 
         return pos;
@@ -59,18 +60,30 @@ remora.AST2JS = function() {
     return result;
   };
 
-  self.notePosition = function(node) {
-    self.emit("/* " + node.pos + " */");
-    self._positionMappings.push([self._resultLine, node.pos]);
+  self.notePosition = function(templatePos, jsAtNode) {
+    if (jsAtNode && jsAtNode.indexOf("\n") >= 0) {
+      var basePos = templatePos - jsAtNode.length;
+      var posOffset = -1;
+      var lineOffset = -1;
+      while ((posOffset = jsAtNode.indexOf("\n", posOffset + 1)) >= 0) {
+        lineOffset += 1;
+        self._positionMappings.push([
+          self._resultLine + lineOffset,
+          basePos + posOffset
+        ]);
+      }
+    } else {
+      self._positionMappings.push([self._resultLine, templatePos]);
+    }
   };
 
   self.walk_string = function(node) {
-    self.notePosition(node);
+    self.notePosition(node.pos);
     self.emit("__context.write(" + self.stringify(node.value) + ");\n");
   };
 
   self.walk_expression = function(node) {
-    self.notePosition(node);
+    self.notePosition(node.pos, node.expr);
     self.emit("__context.write(");
     var filter_closeparens = "";
     for (var i = node.filters.length - 1; i >= 0; i -= 1) {
@@ -109,9 +122,9 @@ remora.AST2JS = function() {
   };
 
   self.walk_codeblock = function(node) {
-    self.notePosition(node);
-    self.emit(node.body);
-    self.emit("\n");
+    var code = node.body + "\n";
+    self.notePosition(node.pos, code);
+    self.emit(code);
   };
 
   return self;

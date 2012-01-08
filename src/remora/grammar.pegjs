@@ -1,35 +1,38 @@
 {
   function computeLocation(pos) {
-    /*
-     * The first idea was to use |String.split| to break the input up to the
-     * error position along newlines and derive the line and column from
-     * there. However IE's |split| implementation is so broken that it was
-     * enough to prevent it.
-     */
+    // Note: this differs slightly from PegJS's 'compute location' function
+    // as it considers newlines to be part of the line, not part of the next
+    // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
+    // '\n') will return `1`, not `2`).
 
     if (pos < 0)
       return { line: -1, column: -1, pos: pos };
-    
+    if (pos > input.length)
+      pos = input.length;
+
     var line = 1;
     var column = 1;
-    var seenCR = false;
-    
-    for (var i = 0; i < pos; i++) {
-      var ch = input.charAt(i);
-      if (ch === '\n') {
-        if (!seenCR) { line++; }
-        column = 1;
-        seenCR = false;
-      } else if (ch === '\r' | ch === '\u2028' || ch === '\u2029') {
-        line++;
-        column = 1;
-        seenCR = true;
-      } else {
-        column++;
-        seenCR = false;
+    var seenNL = false;
+
+    for (var i = 0; i < pos; i += 1) {
+      if (seenNL) {
+        line += 1;
+        column = 0;
+        seenNL = false;
+      }
+      column += 1;
+
+      switch (input.charAt(i)) {
+        case '\r':
+        case '\u2028':
+        case '\u2029':
+          if (i + 1 < pos && input.charAt(i + 1) === '\n')
+            continue;
+        case '\n':
+          seenNL = true;
       }
     }
-    
+
     return { line: line, column: column, pos: pos };
   }
 
