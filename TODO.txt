@@ -1,3 +1,0 @@
-- Implement 'for' loops in templates using real loops instead of a magic
-  __foreach function (so that 'break' and 'return' will work as expected).
-- Implement '<% %>' blocks.

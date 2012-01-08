@@ -23,12 +23,6 @@ remora.AST2JS = function() {
 
     self.emit(
       "(function() {\n" +
-      "  function __foreach(obj, func) {\n" +
-      "    if (!obj) return;\n" +
-      "    for (var key in obj)\n" +
-      "      if (obj.hasOwnProperty(key))\n" +
-      "        func(obj[key], key, obj);\n" +
-      "  }\n" +
       "  return (function(__context) {\n" +
       "    with(__context.data || {}) {\n"
     );
@@ -95,12 +89,31 @@ remora.AST2JS = function() {
     self.emit(filter_closeparens + ");\n");
   };
 
+  self._curUniqueVar = 0;
+  self._mkUniqueVar = function(suffix) {
+    suffix = suffix || "remoraUniqueVar";
+    return "__remora" + suffix + self._curUniqueVar++;
+  }
+
   self.walk_controlblock = function(node) {
+    self.notePosition(node.pos);
     var end_block = "}\n";
     if (node.keyword == "for") {
-      var args = node.vars.join(", ");
-      self.emit("__foreach(" + node.expr + ", function(" + args + ") {\n");
-      end_block = "});\n";
+      var iterable = self._mkUniqueVar("loopIterable");
+      var loopIndex;
+      var loopItem;
+      if (node.vars.length == 1) {
+        loopIndex = self._mkUniqueVar("loopIndex");
+        loopItem = node.vars[0];
+      } else {
+        loopIndex = node.vars[0];
+        loopItem = node.vars[1];
+      }
+      self.emit("var " + iterable + " = (" + node.expr + ");\n");
+      self.emit("for (var " + loopIndex + " in " + iterable + ") {\n");
+      self.emit("  if (" + iterable + ".hasOwnProperty(" + loopIndex + ")) {\n");
+      self.emit("    var " + loopItem + " = " + iterable + "[" + loopIndex + "];\n");
+      end_block = "  }\n}\n";
     } else if (node.keyword == "if" || node.keyword == "while") {
       self.emit(node.keyword + " (" + node.expr + ") {\n");
     } else if (node.keyword == "elif") {
