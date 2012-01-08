@@ -29,10 +29,12 @@ function runLineNumberInErrorTest(suffix) {
   throw Error("expected error not raised!");
 }
 
-test("correct runtimme error line numbers", function() {
-  runLineNumberInErrorTest("(function() { throw Error('ohno'); })()");
-});
+if (evaler.fixExceptionLineNumbers.supported) {
+  test("correct runtimme error line numbers", function() {
+    runLineNumberInErrorTest("(function() { throw Error('ohno'); })()");
+  });
 
-test("correct syntax error line numbers", function() {
-  runLineNumberInErrorTest("blah blah");
-});
+  test("correct syntax error line numbers", function() {
+    runLineNumberInErrorTest("blah blah");
+  });
+}

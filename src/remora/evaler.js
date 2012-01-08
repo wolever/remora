@@ -132,6 +132,8 @@ remora.evaler = (function() {
     }
     if (e.lineNumber) {
       evalSync.codeOffsetNewlines = new Array(e.lineNumber + 1).join("\n");
+    } else {
+      evalSync.codeOffsetNewlines = "";
     }
   }
 
