@@ -836,12 +836,12 @@ remora.parser = (function(){
           }
         }
         if (result11 !== null) {
-          var result18 = parse__();
-          if (result18 !== null) {
+          var result28 = parse__();
+          if (result28 !== null) {
             var result12 = [];
-            while (result18 !== null) {
-              result12.push(result18);
-              var result18 = parse__();
+            while (result28 !== null) {
+              result12.push(result28);
+              var result28 = parse__();
             }
           } else {
             var result12 = null;
@@ -849,30 +849,90 @@ remora.parser = (function(){
           if (result12 !== null) {
             var result13 = parse_var();
             if (result13 !== null) {
-              var result17 = parse__();
-              if (result17 !== null) {
-                var result14 = [];
-                while (result17 !== null) {
-                  result14.push(result17);
-                  var result17 = parse__();
-                }
-              } else {
-                var result14 = null;
+              var savedPos4 = pos;
+              var savedPos5 = pos;
+              var result22 = [];
+              var result27 = parse__();
+              while (result27 !== null) {
+                result22.push(result27);
+                var result27 = parse__();
               }
-              if (result14 !== null) {
-                if (input.substr(pos, 2) === "in") {
-                  var result15 = "in";
-                  pos += 2;
+              if (result22 !== null) {
+                if (input.substr(pos, 1) === ",") {
+                  var result23 = ",";
+                  pos += 1;
                 } else {
-                  var result15 = null;
+                  var result23 = null;
                   if (reportMatchFailures) {
-                    matchFailed("\"in\"");
+                    matchFailed("\",\"");
                   }
                 }
+                if (result23 !== null) {
+                  var result24 = [];
+                  var result26 = parse__();
+                  while (result26 !== null) {
+                    result24.push(result26);
+                    var result26 = parse__();
+                  }
+                  if (result24 !== null) {
+                    var result25 = parse_var();
+                    if (result25 !== null) {
+                      var result20 = [result22, result23, result24, result25];
+                    } else {
+                      var result20 = null;
+                      pos = savedPos5;
+                    }
+                  } else {
+                    var result20 = null;
+                    pos = savedPos5;
+                  }
+                } else {
+                  var result20 = null;
+                  pos = savedPos5;
+                }
+              } else {
+                var result20 = null;
+                pos = savedPos5;
+              }
+              var result21 = result20 !== null
+                ? (function(v) { return v })(result20[3])
+                : null;
+              if (result21 !== null) {
+                var result19 = result21;
+              } else {
+                var result19 = null;
+                pos = savedPos4;
+              }
+              var result14 = result19 !== null ? result19 : '';
+              if (result14 !== null) {
+                var result18 = parse__();
+                if (result18 !== null) {
+                  var result15 = [];
+                  while (result18 !== null) {
+                    result15.push(result18);
+                    var result18 = parse__();
+                  }
+                } else {
+                  var result15 = null;
+                }
                 if (result15 !== null) {
-                  var result16 = parse__block_expr();
+                  if (input.substr(pos, 2) === "in") {
+                    var result16 = "in";
+                    pos += 2;
+                  } else {
+                    var result16 = null;
+                    if (reportMatchFailures) {
+                      matchFailed("\"in\"");
+                    }
+                  }
                   if (result16 !== null) {
-                    var result9 = [result11, result12, result13, result14, result15, result16];
+                    var result17 = parse__block_expr();
+                    if (result17 !== null) {
+                      var result9 = [result11, result12, result13, result14, result15, result16, result17];
+                    } else {
+                      var result9 = null;
+                      pos = savedPos3;
+                    }
                   } else {
                     var result9 = null;
                     pos = savedPos3;
@@ -898,13 +958,16 @@ remora.parser = (function(){
           pos = savedPos3;
         }
         var result10 = result9 !== null
-          ? (function(v, e) {
+          ? (function(v0, v1, e) {
+            var vars  = [v0];
+            if (v1)
+              vars.push(v1);
             return {
               expr: e,
               keyword: "for",
-              vars: [v]
+              vars: vars
             };
-          })(result9[2], result9[5])
+          })(result9[2], result9[3], result9[6])
           : null;
         if (result10 !== null) {
           var result8 = result10;

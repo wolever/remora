@@ -195,11 +195,14 @@ _block_start
 }
 
 _block_start_body
-= "for" _+ v:var _+ "in" e:_block_expr {
+= "for" _+ v0:var v1:(_* "," _* v:var { return v })? _+ "in" e:_block_expr {
+  var vars  = [v0];
+  if (v1)
+    vars.push(v1);
   return {
     expr: e,
     keyword: "for",
-    vars: [v]
+    vars: vars
   };
 }
 / kw:( "if" / "while" ) e:_block_expr {

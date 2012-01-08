@@ -106,7 +106,7 @@ var testcases = [
   },
 
   {
-    name: "for loop",
+    name: "for loop with single var",
     input: (
       "% for foo in bar:\n" +
       "  num: ${foo}\n" +
@@ -134,6 +134,53 @@ var testcases = [
       { __name: "short list",
         bar: [1, 2, 3],
         __expected: "  num: 1\n  num: 2\n  num: 3\n"
+      },
+      { __name: "empty list",
+        bar: [],
+        __expected: ""
+      }
+    ]
+  },
+
+  {
+    name: "for loop with two vars",
+    input: (
+      "% for key, val in bar:\n" +
+      "  ${key}: ${val}\n" +
+      "% endfor"
+    ),
+    expected_ast: [{
+      type: "controlblock",
+      keyword: "for",
+      vars: ["key", "val"],
+      expr: "bar",
+      body: {
+        type: "doc",
+        children: [
+          str("  "),
+          {
+            type: "expression",
+            expr: "key",
+            filters: []
+          },
+          str(": "),
+          {
+            type: "expression",
+            expr: "val",
+            filters: []
+          },
+          str("\n")
+        ]
+      }
+    }],
+    expected_renders: [
+      { __name: "short list",
+        bar: ["foo", "bar"],
+        __expected: "  0: foo\n  1: bar\n"
+      },
+      { __name: "object",
+        bar: { k0: "v0", k1: "v1" },
+        __expected: "  k0: v0\n  k1: v1\n"
       },
       { __name: "empty list",
         bar: [],
