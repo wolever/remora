@@ -3,7 +3,7 @@
     // Note: this differs slightly from PegJS's 'compute location' function
     // as it considers newlines to be part of the line, not part of the next
     // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
-    // '\n') will return `1`, not `2`).
+    // '\n') will return `line: 1`, not `line: 2`).
 
     if (pos < 0)
       return { line: -1, column: -1, pos: pos };
