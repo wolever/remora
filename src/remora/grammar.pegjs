@@ -37,7 +37,7 @@
     options = options || {};
     options.type = type;
     if (options.pos === undefined)
-      options.pos = pos;
+      throw Error("Node " + type + " doesn't define a 'pos'!");
     return options;
   }
 
@@ -68,6 +68,7 @@
 
   function DocNode() {
     return Node("doc", {
+      pos: pos,
       children: []
     });
   };
@@ -135,6 +136,7 @@ markup
 expression
 = "${" body:exprbody  "}" {
   return Node("expression", {
+    pos: pos - 1,
     expr: body.expr,
     filters: body.filter
   });
@@ -254,6 +256,7 @@ _block_end
 code_block
 = "<%" body:(!"%>" ch:. { return ch })+ "%>" {
   return Node("codeblock", {
+    pos: pos - 2,
     body: body.join("")
   });
 }
