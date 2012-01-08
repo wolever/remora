@@ -129,7 +129,8 @@ _doc
 
 markup
 = expression
-/ block_part
+/ control_block
+/ code_block
 
 expression
 = "${" body:exprbody  "}" {
@@ -154,15 +155,15 @@ filter
 / "" { return []; }
 
 
-block_part
+control_block
 = line_start line:(_*) "%%" {
   return line.join("") + "%";
 }
-/ line_start _* "%" _? b:_block_part {
+/ line_start _* "%" _? b:_control_block {
   return b;
 }
 
-_block_part
+_control_block
 = block:(
   _block_start /
   _block_mid /
@@ -250,8 +251,15 @@ _block_end
   return this_block;
 }
 
+code_block
+= "<%" body:(!"%>" ch:. { return ch })+ "%>" {
+  return Node("codeblock", {
+    body: body.join("")
+  });
+}
+
 var
-= v:[a-zA-Z_0-9]+ { return v.join(""); }
+= v:[a-zA-Z_0-9$]+ { return v.join(""); }
 
 _
 = text:([ \t]) {
@@ -267,3 +275,5 @@ nl
 = text:(_* "\n") {
   return text.join("");
 }
+
+/* vim: set filetype=javascript shiftwidth=2 tabstop=2 softtabstop=2 :*/

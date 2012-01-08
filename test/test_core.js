@@ -232,7 +232,45 @@ var testcases = [
         __expected: "  neither\n"
       },
     ]
+  },
+
+  {
+    name: "code block with simple expression",
+    input: "foo:<% var foo = (bar() % baz); %> ${foo}",
+    expected_ast: [
+      str("foo:"),
+      {
+        type: "codeblock",
+        body: " var foo = (bar() % baz); "
+      },
+      str(" "),
+      {
+        type: "expression",
+        expr: "foo",
+      }
+    ],
+    expected_renders: [
+      { bar: function() { return 5 },
+        baz: 2,
+        __expected: "foo: 1"
+      }
+    ]
+  },
+
+  {
+    name: "code block calling __context.write",
+    input: "<% __context.write('foo') %>",
+    expected_ast: [
+      {
+        type: "codeblock",
+        body: " __context.write('foo') "
+      },
+    ],
+    expected_renders: [
+      { __expected: "foo" }
+    ]
   }
+
 ];
 
 var runTests = function() {

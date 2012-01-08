@@ -17,11 +17,12 @@ remora.parser = (function(){
         "_block_expr": parse__block_expr,
         "_block_mid": parse__block_mid,
         "_block_mid_body": parse__block_mid_body,
-        "_block_part": parse__block_part,
         "_block_start": parse__block_start,
         "_block_start_body": parse__block_start_body,
+        "_control_block": parse__control_block,
         "_doc": parse__doc,
-        "block_part": parse_block_part,
+        "code_block": parse_code_block,
+        "control_block": parse_control_block,
         "doc": parse_doc,
         "exprbody": parse_exprbody,
         "expression": parse_expression,
@@ -253,15 +254,20 @@ remora.parser = (function(){
         }
         
         
-        var result2 = parse_expression();
-        if (result2 !== null) {
-          var result0 = result2;
+        var result3 = parse_expression();
+        if (result3 !== null) {
+          var result0 = result3;
         } else {
-          var result1 = parse_block_part();
-          if (result1 !== null) {
-            var result0 = result1;
+          var result2 = parse_control_block();
+          if (result2 !== null) {
+            var result0 = result2;
           } else {
-            var result0 = null;;
+            var result1 = parse_code_block();
+            if (result1 !== null) {
+              var result0 = result1;
+            } else {
+              var result0 = null;;
+            };
           };
         }
         
@@ -519,8 +525,8 @@ remora.parser = (function(){
         return result0;
       }
       
-      function parse_block_part() {
-        var cacheKey = 'block_part@' + pos;
+      function parse_control_block() {
+        var cacheKey = 'control_block@' + pos;
         var cachedResult = cache[cacheKey];
         if (cachedResult) {
           pos = cachedResult.nextPos;
@@ -600,7 +606,7 @@ remora.parser = (function(){
                 var result9 = parse__();
                 var result7 = result9 !== null ? result9 : '';
                 if (result7 !== null) {
-                  var result8 = parse__block_part();
+                  var result8 = parse__control_block();
                   if (result8 !== null) {
                     var result2 = [result4, result5, result6, result7, result8];
                   } else {
@@ -650,8 +656,8 @@ remora.parser = (function(){
         return result0;
       }
       
-      function parse__block_part() {
-        var cacheKey = '_block_part@' + pos;
+      function parse__control_block() {
+        var cacheKey = '_control_block@' + pos;
         var cachedResult = cache[cacheKey];
         if (cachedResult) {
           pos = cachedResult.nextPos;
@@ -1305,6 +1311,182 @@ remora.parser = (function(){
         return result0;
       }
       
+      function parse_code_block() {
+        var cacheKey = 'code_block@' + pos;
+        var cachedResult = cache[cacheKey];
+        if (cachedResult) {
+          pos = cachedResult.nextPos;
+          return cachedResult.result;
+        }
+        
+        
+        var savedPos0 = pos;
+        var savedPos1 = pos;
+        if (input.substr(pos, 2) === "<%") {
+          var result3 = "<%";
+          pos += 2;
+        } else {
+          var result3 = null;
+          if (reportMatchFailures) {
+            matchFailed("\"<%\"");
+          }
+        }
+        if (result3 !== null) {
+          var savedPos2 = pos;
+          var savedPos3 = pos;
+          var savedPos4 = pos;
+          var savedReportMatchFailuresVar0 = reportMatchFailures;
+          reportMatchFailures = false;
+          if (input.substr(pos, 2) === "%>") {
+            var result11 = "%>";
+            pos += 2;
+          } else {
+            var result11 = null;
+            if (reportMatchFailures) {
+              matchFailed("\"%>\"");
+            }
+          }
+          reportMatchFailures = savedReportMatchFailuresVar0;
+          if (result11 === null) {
+            var result9 = '';
+          } else {
+            var result9 = null;
+            pos = savedPos4;
+          }
+          if (result9 !== null) {
+            if (input.length > pos) {
+              var result10 = input.charAt(pos);
+              pos++;
+            } else {
+              var result10 = null;
+              if (reportMatchFailures) {
+                matchFailed('any character');
+              }
+            }
+            if (result10 !== null) {
+              var result7 = [result9, result10];
+            } else {
+              var result7 = null;
+              pos = savedPos3;
+            }
+          } else {
+            var result7 = null;
+            pos = savedPos3;
+          }
+          var result8 = result7 !== null
+            ? (function(ch) { return ch })(result7[1])
+            : null;
+          if (result8 !== null) {
+            var result6 = result8;
+          } else {
+            var result6 = null;
+            pos = savedPos2;
+          }
+          if (result6 !== null) {
+            var result4 = [];
+            while (result6 !== null) {
+              result4.push(result6);
+              var savedPos2 = pos;
+              var savedPos3 = pos;
+              var savedPos4 = pos;
+              var savedReportMatchFailuresVar0 = reportMatchFailures;
+              reportMatchFailures = false;
+              if (input.substr(pos, 2) === "%>") {
+                var result11 = "%>";
+                pos += 2;
+              } else {
+                var result11 = null;
+                if (reportMatchFailures) {
+                  matchFailed("\"%>\"");
+                }
+              }
+              reportMatchFailures = savedReportMatchFailuresVar0;
+              if (result11 === null) {
+                var result9 = '';
+              } else {
+                var result9 = null;
+                pos = savedPos4;
+              }
+              if (result9 !== null) {
+                if (input.length > pos) {
+                  var result10 = input.charAt(pos);
+                  pos++;
+                } else {
+                  var result10 = null;
+                  if (reportMatchFailures) {
+                    matchFailed('any character');
+                  }
+                }
+                if (result10 !== null) {
+                  var result7 = [result9, result10];
+                } else {
+                  var result7 = null;
+                  pos = savedPos3;
+                }
+              } else {
+                var result7 = null;
+                pos = savedPos3;
+              }
+              var result8 = result7 !== null
+                ? (function(ch) { return ch })(result7[1])
+                : null;
+              if (result8 !== null) {
+                var result6 = result8;
+              } else {
+                var result6 = null;
+                pos = savedPos2;
+              }
+            }
+          } else {
+            var result4 = null;
+          }
+          if (result4 !== null) {
+            if (input.substr(pos, 2) === "%>") {
+              var result5 = "%>";
+              pos += 2;
+            } else {
+              var result5 = null;
+              if (reportMatchFailures) {
+                matchFailed("\"%>\"");
+              }
+            }
+            if (result5 !== null) {
+              var result1 = [result3, result4, result5];
+            } else {
+              var result1 = null;
+              pos = savedPos1;
+            }
+          } else {
+            var result1 = null;
+            pos = savedPos1;
+          }
+        } else {
+          var result1 = null;
+          pos = savedPos1;
+        }
+        var result2 = result1 !== null
+          ? (function(body) {
+            return Node("codeblock", {
+              body: body.join("")
+            });
+          })(result1[1])
+          : null;
+        if (result2 !== null) {
+          var result0 = result2;
+        } else {
+          var result0 = null;
+          pos = savedPos0;
+        }
+        
+        
+        
+        cache[cacheKey] = {
+          nextPos: pos,
+          result:  result0
+        };
+        return result0;
+      }
+      
       function parse_var() {
         var cacheKey = 'var@' + pos;
         var cachedResult = cache[cacheKey];
@@ -1315,26 +1497,26 @@ remora.parser = (function(){
         
         
         var savedPos0 = pos;
-        if (input.substr(pos).match(/^[a-zA-Z_0-9]/) !== null) {
+        if (input.substr(pos).match(/^[a-zA-Z_0-9$]/) !== null) {
           var result3 = input.charAt(pos);
           pos++;
         } else {
           var result3 = null;
           if (reportMatchFailures) {
-            matchFailed("[a-zA-Z_0-9]");
+            matchFailed("[a-zA-Z_0-9$]");
           }
         }
         if (result3 !== null) {
           var result1 = [];
           while (result3 !== null) {
             result1.push(result3);
-            if (input.substr(pos).match(/^[a-zA-Z_0-9]/) !== null) {
+            if (input.substr(pos).match(/^[a-zA-Z_0-9$]/) !== null) {
               var result3 = input.charAt(pos);
               pos++;
             } else {
               var result3 = null;
               if (reportMatchFailures) {
-                matchFailed("[a-zA-Z_0-9]");
+                matchFailed("[a-zA-Z_0-9$]");
               }
             }
           }

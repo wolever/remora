@@ -54,7 +54,7 @@ documentation can be used to fill in the details.
 Loading
 -------
 
-Loading kind of sucks right now. Sorry. Just copy whatever I do in ``example/index.html``.
+XXX WRITE THIS XXX
 
 In the near future, though, you will be able to load ``remora`` from...
 

@@ -108,5 +108,11 @@ remora.AST2JS = function() {
     }
   };
 
+  self.walk_codeblock = function(node) {
+    self.notePosition(node);
+    self.emit(node.body);
+    self.emit("\n");
+  };
+
   return self;
 };

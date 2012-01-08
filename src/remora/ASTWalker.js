@@ -6,7 +6,7 @@ remora.ASTWalker = function() {
   self.walk = function(node) {
     var walker = self["walk_" + node.type];
     if (walker === undefined)
-      throw Error("unknown node type: " + node.type);
+      throw Error("ASTWalker: unknown node type: " + node.type);
 
     if (walker)
       walker(node);
@@ -15,6 +15,7 @@ remora.ASTWalker = function() {
   // Nodes which have no children don't need to be walked.
   self.walk_string = null;
   self.walk_expression = null;
+  self.walk_codeblock = null;
 
   self.walk_doc = function(node) {
     for (var i = 0; i < node.children.length; i += 1)
