@@ -31,7 +31,7 @@ test("rendering a template from .template", function() {
 });
 
 test("using .render to replace an element", function() {
-  var elem = $("#template").remora("render", { name: "world" }});
+  var elem = $("#template").remora("render", { name: "world" });
   $.each({
     "id": "template",
     "type": undefined,

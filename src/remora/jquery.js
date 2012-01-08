@@ -41,7 +41,8 @@ var methods = {
     return $(newElem);
   },
 
-  render: function(elem, options) {
+  render: function(elem, data, options) {
+    options.data = options.data || data;
     elem = methods.prepare(elem, options);
     var template = methods.template(elem, options);
     elem[0].innerHTML = template.render(options.data);
@@ -49,9 +50,9 @@ var methods = {
   }
 };
 
-$.fn.remora = function(methodName, options) {
+$.fn.remora = function(methodName, first, second) {
   if (methodName === "setRemora") {
-    remora = options;
+    remora = first;
     return this;
   }
 
@@ -62,9 +63,18 @@ $.fn.remora = function(methodName, options) {
   if (!this.length)
     throw Error("Invalid call (invalid 'this': " + this + ")");
 
-  if (methodName !== "options")
-    options = methods.options(this, options);
-  return method.apply(null, [this, options]);
+  switch (methodName) {
+    case "render":
+      second = methods.options(this, second);
+      break;
+    case "options":
+      /* do nothing */
+      break;
+    default:
+      first = methods.options(this, first);
+  }
+
+  return method.apply(null, [this, first, second]);
 };
 
 })(jQuery);
