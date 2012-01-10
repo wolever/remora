@@ -321,7 +321,7 @@ var testcases = [
 ];
 
 var runTests = function() {
-  _.each(testcases, function(testcase) {
+  testcases.forEach(function(testcase) {
     test(testcase.name, function() {
       func(testcase);
     });
@@ -329,7 +329,7 @@ var runTests = function() {
 }
 
 QUnit.module("parser");
-_.each(testcases, function(testcase) {
+testcases.forEach(function(testcase) {
   test(testcase.name, function() {
     var actual = parser.parse(testcase.input);
     equal(actual.type, "doc");
@@ -338,8 +338,8 @@ _.each(testcases, function(testcase) {
 });
 
 QUnit.module("rendering");
-_.each(testcases, function(testcase) {
-  _.each(testcase.expected_renders || [], function(expected_render) {
+testcases.forEach(function(testcase) {
+  (testcase.expected_renders || []).forEach(function(expected_render) {
     var rname = expected_render.__name;
     var name = testcase.name + (rname? " - " + rname : "");
     test(name, function() {
@@ -373,7 +373,7 @@ var line_error_testcases = (!line_numbers_supported)? [] : [
   }
 ];
 
-_.each(line_error_testcases, function(testcase) {
+line_error_testcases.forEach(function(testcase) {
   test(testcase.name, function() {
     try {
       remora.render(testcase.text);

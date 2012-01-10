@@ -38,7 +38,6 @@ var COMPILED = false;
  */
 var goog = goog || {}; // Identifies this file as the Closure base.
 
-
 /**
  * Reference to the global context.  In most cases this will be 'window'.
  */

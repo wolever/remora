@@ -26,8 +26,8 @@ var testcases = [
 ];
 
 QUnit.module("transforms");
-_.each(testcases, function(testcase) {
-  _.each(testcase.expected_renders || [], function(expected_render) {
+testcases.forEach(function(testcase) {
+  (testcase.expected_renders || []).forEach(function(expected_render) {
     var rname = expected_render.__name;
     var name = testcase.name + (rname? " - " + rname : "");
     test(name, function() {
