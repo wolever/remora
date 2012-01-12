@@ -1802,7 +1802,7 @@ remora.parser = (function(){
       
       // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
       
-      // '\n') will return `1`, not `2`).
+      // '\n') will return `line: 1`, not `line: 2`).
       
   
       

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+VERSION = 0.1
+DEV_VERSION = ${VERSION}_$(shell hg node --template "{node|short}")-dev
+
+ORDERED_JS = $(shell closurebuilder.py --root src/ --namespace "remora")
 PATH := node_modules/.bin/:${PATH}
 
 dev: src/remora/parser.js src/browser/deps.js 
@@ -15,10 +19,13 @@ src/browser/deps.js: src/*.js src/remora/*.js
 clean:
 	rm src/browser/deps.js
 	rm src/remora/parser.js
+	rm build/*
 
-package:
-	mkdir build 2> /dev/null || true
-	closure `closurebuilder.py --root src/ --namespace "remora"` > build/package.js
+build/package_base.js: src/remora/parser.js
+	cat ${ORDERED_JS} > $@
+
+devpkg: build/package_base.js
+	cp $^ build/remora-${DEV_VERSION}.js
 
 gh-page:
 	hg co gh-pages
