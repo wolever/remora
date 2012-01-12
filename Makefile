@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION = 0.1
-DEV_VERSION = ${VERSION}_$(shell hg node --template "{node|short}")-dev
+VERSION = 0.1.0
+DEV_VERSION = ${VERSION}-$(shell hg node --template "{rev}_{node|short}")-dev
 
 ORDERED_JS = $(shell closurebuilder.py --root src/ --namespace "remora")
 PATH := node_modules/.bin/:${PATH}
