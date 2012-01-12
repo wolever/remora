@@ -140,7 +140,7 @@ Consider this simple Twitter-like site::
     </div>
 
     <script id="selected-status" type="text/x-remora">
-        % if !status:
+        % if typeof status === "undefined":
             <p>Click a status update to get more details...</p>
             <% return; /* note: '<% .. %>' isn't implemented yet */ %>
         % endif
