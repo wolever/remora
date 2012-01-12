@@ -63,7 +63,7 @@ $.fn.remora = function(methodName, first, second) {
     throw Error("Unknown method: " + methodName);
 
   if (!this.length)
-    throw Error("Invalid call (invalid 'this': " + this + ")");
+    throw Error("Invalid call (empty selector)");
 
   switch (methodName) {
     case "render":

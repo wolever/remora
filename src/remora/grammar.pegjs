@@ -282,7 +282,7 @@ line_start
 
 nl
 = text:(_* "\n") {
-  return text.join("");
+  return text[0].join("") + text[1];
 }
 
 /* vim: set filetype=javascript shiftwidth=2 tabstop=2 softtabstop=2 :*/

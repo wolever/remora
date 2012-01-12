@@ -123,10 +123,13 @@ remora.Template = function(text, options) {
     } catch (e) {
       goog.global.__render_error = e;
       self._fixupRenderException(e);
-      if (e.templateLocation.line)
+      if (e.templateLocation.line) {
         e.message = (
           "template line " + e.templateLocation.line + ": " + e.message
         );
+      } else {
+        e.message = "in remora template: " + e.message;
+      }
       throw e;
     }
 

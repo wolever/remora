@@ -24,10 +24,13 @@ clean:
 
 build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	mkdir build 2> /dev/null || true
-	cat ${ORDERED_JS} > $@
+	echo "var goog = { ENABLE_DEBUG_LOADER: false };" > $@
+	cat ${ORDERED_JS} >> $@
 
 devpkg: build/package_base.js
-	cp $^ build/remora-${DEV_VERSION}.js
+	$(eval TARGET := build/remora-${DEV_VERSION}.js)
+	echo "/* version: ${TARGET} */" > ${TARGET}
+	cat $^ >> ${TARGET}
 
 gh-page:
 	hg co gh-pages

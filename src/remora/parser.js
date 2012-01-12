@@ -1708,7 +1708,7 @@ remora.parser = (function(){
         }
         var result2 = result1 !== null
           ? (function(text) {
-            return text.join("");
+            return text[0].join("") + text[1];
           })(result1)
           : null;
         if (result2 !== null) {
