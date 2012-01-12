@@ -1,6 +1,8 @@
 (function($) {
+if ($ === undefined)
+  return;
 
-var remora = window.remora;
+var remora = goog.global.remora;
 
 var methods = {
   options: function(elem, options) {
@@ -77,4 +79,4 @@ $.fn.remora = function(methodName, first, second) {
   return method.apply(null, [this, first, second]);
 };
 
-})(jQuery);
+})(goog.global.jQuery);
