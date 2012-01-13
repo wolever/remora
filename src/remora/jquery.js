@@ -26,11 +26,14 @@ var methods = {
   },
 
   prepare: function(elem, options) {
-    if (elem.data("remora:has-been-prepared"))
-      return elem;
+    var prepared = elem.data("remora:prepared-element");
+    if (prepared)
+      return prepared;
 
     var oldElem = elem[0];
+    var $oldElem = elem;
     var newElem = document.createElement(options.tag);
+    var $newElem = $(newElem);
     for (var i = 0; i < oldElem.attributes.length; i += 1) {
       var attr = oldElem.attributes[i];
       if (options.ignoreAttributes[attr.name])
@@ -38,9 +41,10 @@ var methods = {
       newElem.attributes.setNamedItemNS(attr.cloneNode(false));
     }
     oldElem.parentNode.replaceChild(newElem, oldElem);
-    template = methods.template(elem, options, $(newElem));
-    $(newElem).data("remora:has-been-prepared", true);
-    return $(newElem);
+    template = methods.template(elem, options, $newElem);
+    $oldElem.data("remora:prepared-element", $newElem);
+    $newElem.data("remora:prepared-element", $newElem);
+    return $newElem;
   },
 
   render: function(elem, data, options) {

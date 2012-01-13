@@ -49,9 +49,30 @@ test("preparing with .prepare", function() {
   equal(elem.html(), "");
 });
 
-test("re-rendering a .rendered element", function() {
+asyncTest("re-rendering a .rendered element", function() {
   $("#template").remora("render", { name: "first render" });
-  $("#template").remora("render", { name: "second render" });
-  $("#template").remora("render", { name: "world" });
-  renderedEqual($("#template").html());
+  setTimeout(function() {
+    $("#template").remora("render", { name: "second render" });
+    setTimeout(function() {
+      $("#template").remora("render", { name: "world" });
+      setTimeout(function() {
+        renderedEqual($("#template").html());
+        start();
+      }, 0);
+    }, 0);
+  }, 0);
+});
+
+asyncTest("calling .render multiple times", function() {
+  var template = $("#template");
+  setTimeout(function() {
+    template.remora("render", { name: "second render" });
+    setTimeout(function() {
+      template.remora("render", { name: "world" });
+      setTimeout(function() {
+        renderedEqual($("#template").html());
+        start();
+      }, 0);
+    }, 0);
+  }, 0);
 });
