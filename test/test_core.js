@@ -305,12 +305,12 @@ var testcases = [
   },
 
   {
-    name: "code block calling __context.write",
-    input: "<% __context.write('foo') %>",
+    name: "code block calling this.write",
+    input: "<% this.write('foo') %>",
     expected_ast: [
       {
         type: "codeblock",
-        body: " __context.write('foo') "
+        body: " this.write('foo') "
       },
     ],
     expected_renders: [
