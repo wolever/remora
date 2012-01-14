@@ -5,9 +5,27 @@ goog.provide("remora.AST2JS");
 remora.AST2JS = function() {
   var self = remora.ASTWalker();
 
-  self.stringify = function(val) {
-    return JSON.stringify(val);
+  var quoteable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+  var quoted = {
+    '\b': '\\b',
+    '\t': '\\t',
+    '\n': '\\n',
+    '\f': '\\f',
+    '\r': '\\r',
+    '"' : '\\"',
+    '\\': '\\\\'
   };
+
+  // Taken from json2.js
+  self.quote = function(string) {
+    quoteable.lastIndex = 0;
+    return quoteable.test(string) ? '"' + string.replace(quoteable, function (a){
+      var c = quoted[a];
+      return typeof c === 'string'
+        ? c
+        : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+    }) + '"' : '"' + string + '"';
+  }
 
   self.emit = function(fragment) {
     var offset = 0;
@@ -73,7 +91,7 @@ remora.AST2JS = function() {
 
   self.walk_string = function(node) {
     self.notePosition(node.pos);
-    self.emit("this.write(" + self.stringify(node.value) + ");\n");
+    self.emit("this.write(" + self.quote(node.value) + ");\n");
   };
 
   self.walk_expression = function(node) {
@@ -82,7 +100,7 @@ remora.AST2JS = function() {
     var filter_closeparens = "";
     for (var i = node.filters.length - 1; i >= 0; i -= 1) {
       var filter = node.filters[i];
-      self.emit("this.filter(" + self.stringify(filter) + ", ");
+      self.emit("this.filter(" + self.quote(filter) + ", ");
       filter_closeparens += ")";
     }
     self.emit("(" + node.expr + ")");
