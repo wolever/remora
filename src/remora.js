@@ -130,6 +130,7 @@ remora.Template = function(text, options) {
       } else {
         e.message = "in remora template: " + e.message;
       }
+      e.message += " (see global __render_error)";
       throw e;
     }
 

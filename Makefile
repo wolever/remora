@@ -24,7 +24,7 @@ clean:
 
 build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	mkdir build 2> /dev/null || true
-	echo "var goog = { ENABLE_DEBUG_LOADER: false };" > $@
+	echo "CLOSURE_NO_DEPS = true;" > $@
 	cat ${ORDERED_JS} >> $@
 
 devpkg: build/package_base.js
