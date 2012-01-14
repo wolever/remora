@@ -41,8 +41,8 @@ remora.AST2JS = function() {
 
     self.emit(
       "(function() {\n" +
-      "  return (function() {\n" +
-      "    with(this.data || {}) {\n"
+      "  return (function(__context) {\n" +
+      "    with(__context.data || {}) {\n"
     );
     self.walk(tree);
     self.emit(
@@ -91,16 +91,16 @@ remora.AST2JS = function() {
 
   self.walk_string = function(node) {
     self.notePosition(node.pos);
-    self.emit("this.write(" + self.quote(node.value) + ");\n");
+    self.emit("__context.write(" + self.quote(node.value) + ");\n");
   };
 
   self.walk_expression = function(node) {
     self.notePosition(node.pos, node.expr);
-    self.emit("this.write(");
+    self.emit("__context.write(");
     var filter_closeparens = "";
     for (var i = node.filters.length - 1; i >= 0; i -= 1) {
       var filter = node.filters[i];
-      self.emit("this.filter(" + self.quote(filter) + ", ");
+      self.emit("__context.filter(" + self.quote(filter) + ", ");
       filter_closeparens += ")";
     }
     self.emit("(" + node.expr + ")");

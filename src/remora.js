@@ -119,7 +119,7 @@ remora.Template = function(text, options) {
       data: data
     });
     try {
-      self._render.call(context);
+      self._render(context);
     } catch (e) {
       goog.global.__render_error = e;
       self._fixupRenderException(e);
@@ -130,7 +130,6 @@ remora.Template = function(text, options) {
       } else {
         e.message = "in remora template: " + e.message;
       }
-      e.message += " (see global __render_error)";
       throw e;
     }
 
