@@ -27,10 +27,19 @@ build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	echo "CLOSURE_NO_DEPS = true;" > $@
 	cat ${ORDERED_JS} >> $@
 
-devpkg: build/package_base.js
+build/devpkg.js: build/package_base.js
 	$(eval TARGET := build/remora-${DEV_VERSION}.js)
-	echo "/* version: ${TARGET} */" > ${TARGET}
-	cat $^ >> ${TARGET}
+	echo 'var REMORA_VERSION = "${DEV_VERSION}";' > build/devpkg.js
+	cat $^ >> build/devpkg.js
+	ln -f build/devpkg.js ${TARGET}
+
+devpkg: build/devpkg.js
+
+testrunners: devpkg
+	./test/build_testrunners.js
+
+test: testrunners
+	echo "Run tests by opening or executing the testrunner-* files in test/"
 
 gh-page:
 	hg co gh-pages

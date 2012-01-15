@@ -6,6 +6,8 @@ goog.require("remora.evaler");
 
 goog.provide("remora");
 
+remora.version = goog.global.REMORA_VERSION || "dev";
+
 remora.RenderContext = function(options) {
   var self = remora.utils.extend({
     buffer: [],
@@ -141,19 +143,19 @@ remora.Template = function(text, options) {
   return self;
 };
 
-remora.Template.smartLoad = function(obj) {
+remora.Template.smartLoad = function(obj, options) {
   if (typeof obj === "string")
-    return remora.Template(obj);
+    return remora.Template(obj, options);
 
   if (obj === null || obj === undefined)
-    return remora.Template("" + obj);
+    obj = "" + obj;
 
   // This is how jQuery detects DOM nodes, and it seems reasonable... So I'm
   // going to copy it.
   if (obj.nodeType)
-    return remora.Template(obj.innerHTML);
+    obj = obj.innerHTML;
 
-  return remora.Template("" + obj);
+  return remora.Template("" + obj, options);
 };
 
 (function() {
@@ -181,6 +183,6 @@ remora.Template.smartLoad = function(obj) {
   };
 })();
 
-remora.render = function(text, data) {
-  return remora.Template.smartLoad(text).render(data);
+remora.render = function(text, data, options) {
+  return remora.Template.smartLoad(text, options).render(data);
 };

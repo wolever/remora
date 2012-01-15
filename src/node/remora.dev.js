@@ -3,14 +3,12 @@
  * Only used during development (ex, to running tests).
  * Exports the ``remora`` namespace, with the addition of a ``__goog``
  * property, which is the ``goog`` top-level namespace.
+ * Note: this script also injects ``remora`` and ``goog`` into the global
+ * namespace. This is necessary to make them work during development.
  */
 
 var vm = require("vm");
 var fs = require("fs");
-
-var _oldGlobalsKeys = {};
-for (var key in GLOBAL)
-  _oldGlobalsKeys[key] = true;
 
 var execfile = function(path) {
   var data = fs.readFileSync(path);
@@ -27,7 +25,3 @@ execfile("../src/remora.js");
 
 remora.__goog = goog;
 module.exports = remora;
-
-for (var key in GLOBAL)
-  if (!_oldGlobalsKeys[key])
-    delete GLOBAL[key];

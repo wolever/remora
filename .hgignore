@@ -16,3 +16,4 @@ env/
 *egg-info*
 node_modules/
 build/
+test/testrunner-*

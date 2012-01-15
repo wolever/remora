@@ -6,11 +6,7 @@
   <script src="../libs/qunit-75dae0b/qunit.js"></script>
   <script src="../libs/underscore-1.2.3.js"></script>
 
-  <script src="../src/browser/base.js"></script>
-  <script>
-    goog.require("remora");
-  </script>
-  <script src="../src/remora/jquery.js"></script>
+  ${setup}
 
   <script>
     function log() {
@@ -29,14 +25,18 @@
     }
   </script>
 
-  <script src="test_evaler.js"></script>
-  <script src="test_core.js"></script>
-  <script src="test_transforms.js"></script>
+  % for testScript in testScripts:
+    <script src="${testScript}"></script>
+  % endfor
   <script src="test_jquery.js"></script>
+
 </head>
 
 <body>
-  <h1 id="qunit-header">remora tests</h1>
+  <h1 id="qunit-header"></h1>
+  <script>
+    $("#qunit-header").text("version " + remora.version);
+  </script>
   <h2 id="qunit-banner"></h2>
   <div id="qunit-testrunner-toolbar"></div>
   <h2 id="qunit-userAgent"></h2>
