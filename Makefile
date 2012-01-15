@@ -45,6 +45,7 @@ gh-page:
 	hg co gh-pages
 	hg merge master
 	make testrunners
+	hg add test/testrunner-*
 	hg ci -m "Merge master -> gh-pages"
 	hg co master
 	hg push
