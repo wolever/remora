@@ -106,7 +106,7 @@ var testcases = [
   },
 
   {
-    name: "for loop",
+    name: "for loop with single var",
     input: (
       "% for foo in bar:\n" +
       "  num: ${foo}\n" +
@@ -134,6 +134,53 @@ var testcases = [
       { __name: "short list",
         bar: [1, 2, 3],
         __expected: "  num: 1\n  num: 2\n  num: 3\n"
+      },
+      { __name: "empty list",
+        bar: [],
+        __expected: ""
+      }
+    ]
+  },
+
+  {
+    name: "for loop with two vars",
+    input: (
+      "% for key, val in bar:\n" +
+      "  ${key}: ${val}\n" +
+      "% endfor"
+    ),
+    expected_ast: [{
+      type: "controlblock",
+      keyword: "for",
+      vars: ["key", "val"],
+      expr: "bar",
+      body: {
+        type: "doc",
+        children: [
+          str("  "),
+          {
+            type: "expression",
+            expr: "key",
+            filters: []
+          },
+          str(": "),
+          {
+            type: "expression",
+            expr: "val",
+            filters: []
+          },
+          str("\n")
+        ]
+      }
+    }],
+    expected_renders: [
+      { __name: "short list",
+        bar: ["foo", "bar"],
+        __expected: "  0: foo\n  1: bar\n"
+      },
+      { __name: "object",
+        bar: { k0: "v0", k1: "v1" },
+        __expected: "  k0: v0\n  k1: v1\n"
       },
       { __name: "empty list",
         bar: [],
@@ -232,11 +279,49 @@ var testcases = [
         __expected: "  neither\n"
       },
     ]
+  },
+
+  {
+    name: "code block with simple expression",
+    input: "foo:<% var foo = (bar() % baz); %> ${foo}",
+    expected_ast: [
+      str("foo:"),
+      {
+        type: "codeblock",
+        body: " var foo = (bar() % baz); "
+      },
+      str(" "),
+      {
+        type: "expression",
+        expr: "foo",
+      }
+    ],
+    expected_renders: [
+      { bar: function() { return 5 },
+        baz: 2,
+        __expected: "foo: 1"
+      }
+    ]
+  },
+
+  {
+    name: "code block calling __context.write",
+    input: "<% __context.write('foo') %>",
+    expected_ast: [
+      {
+        type: "codeblock",
+        body: " __context.write('foo') "
+      },
+    ],
+    expected_renders: [
+      { __expected: "foo" }
+    ]
   }
+
 ];
 
 var runTests = function() {
-  _.each(testcases, function(testcase) {
+  testcases.forEach(function(testcase) {
     test(testcase.name, function() {
       func(testcase);
     });
@@ -244,7 +329,7 @@ var runTests = function() {
 }
 
 QUnit.module("parser");
-_.each(testcases, function(testcase) {
+testcases.forEach(function(testcase) {
   test(testcase.name, function() {
     var actual = parser.parse(testcase.input);
     equal(actual.type, "doc");
@@ -253,8 +338,8 @@ _.each(testcases, function(testcase) {
 });
 
 QUnit.module("rendering");
-_.each(testcases, function(testcase) {
-  _.each(testcase.expected_renders || [], function(expected_render) {
+testcases.forEach(function(testcase) {
+  (testcase.expected_renders || []).forEach(function(expected_render) {
     var rname = expected_render.__name;
     var name = testcase.name + (rname? " - " + rname : "");
     test(name, function() {
@@ -267,28 +352,37 @@ _.each(testcases, function(testcase) {
   });
 });
 
-test("includes line number on JS syntax errors", function() {
-  try {
-    remora.render("1\n2\n${invalid expression}");
-  } catch (e) {
-    if (e.templateLocation.line < 0)
-      return;
-    equal(e.templateLocation.line, 3);
-    return;
-  }
-  throw Error("expected error not raised!");
-});
+var line_numbers_supported = remora.evaler.fixExceptionLineNumbers.supported;
+var line_error_testcases = (!line_numbers_supported)? [] : [
+  {
+    name: "includes line number on JS syntax errors",
+    text: "1\n2\n${invalid expression}",
+    expected_line_number: 3
+  },
 
-test("includes line number on runtime errors", function() {
-  try {
-    remora.render("1\n2\n3\n${null.foo}");
-  } catch (e) {
-    if (e.templateLocation.line < 0)
-      return;
-    equal(e.templateLocation.line, 4);
-    return;
+  {
+    name: "includes line number on runtime errors",
+    text: "1\n2\n3\n${null()}",
+    expected_line_number: 4
+  },
+
+  {
+    name: "line numbers are correct for code blocks",
+    text: "<%\n2;\nfoo();\n4;\n%>",
+    expected_line_number: 3
   }
-  throw Error("expected error not raised!");
+];
+
+line_error_testcases.forEach(function(testcase) {
+  test(testcase.name, function() {
+    try {
+      remora.render(testcase.text);
+    } catch (e) {
+      equal(e.templateLocation.line, testcase.expected_line_number);
+      return;
+    }
+    throw Error("expected error not raised!");
+  });
 });
 
 QUnit.module("remora.render");

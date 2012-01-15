@@ -6,6 +6,8 @@ goog.require("remora.evaler");
 
 goog.provide("remora");
 
+remora.version = goog.global.REMORA_VERSION || "dev";
+
 remora.RenderContext = function(options) {
   var self = remora.utils.extend({
     buffer: [],
@@ -52,6 +54,7 @@ remora.Template = function(text, options) {
   self._fixupRenderException = function(e) {
     var templateFileName = "<remora template>";
     remora.evaler.fixExceptionLineNumbers(e, templateFileName);
+    e.templateLocation = {};
     if (e.hasIncorrectLineNumbers)
       return;
 
@@ -96,8 +99,6 @@ remora.Template = function(text, options) {
       goog.global.__bad_script = self._js.source;
       goog.global.__eval_error = e;
       self._fixupRenderException(e);
-      // The templateLocation *should* always exist...
-      var templateLocation = e.templateLocation || {};
       if (e.hasIncorrectLineNumbers) {
         e.message = (
           "with generated JavaScript (see global __bad_script) line " +
@@ -107,7 +108,8 @@ remora.Template = function(text, options) {
       } else {
         e.message = (
           "with generated JavaScript (see global __bad_script). Error " +
-          "caused by template line " + e.lineNumber + ": " + e.message
+          "caused by template line " + e.templateLocation.line + ": " +
+          e.message
         );
       }
       throw e;
@@ -123,8 +125,14 @@ remora.Template = function(text, options) {
     } catch (e) {
       goog.global.__render_error = e;
       self._fixupRenderException(e);
-      if (e.templateLocation)
-        e.message = "template line " + e.templateLocation.line + ": " + e.message;
+      if (e.templateLocation.line) {
+        e.message = (
+          "template line " + e.templateLocation.line + ": " + e.message
+        );
+      } else {
+        e.message = "in remora template: " + e.message;
+      }
+      e.message += " (see global __render_error)";
       throw e;
     }
 
@@ -135,19 +143,19 @@ remora.Template = function(text, options) {
   return self;
 };
 
-remora.Template.smartLoad = function(obj) {
+remora.Template.smartLoad = function(obj, options) {
   if (typeof obj === "string")
-    return remora.Template(obj);
+    return remora.Template(obj, options);
 
   if (obj === null || obj === undefined)
-    return remora.Template("" + obj);
+    obj = "" + obj;
 
   // This is how jQuery detects DOM nodes, and it seems reasonable... So I'm
   // going to copy it.
   if (obj.nodeType)
-    return remora.Template(obj.innerHTML);
+    obj = obj.innerHTML;
 
-  return remora.Template("" + obj);
+  return remora.Template("" + obj, options);
 };
 
 (function() {
@@ -175,6 +183,6 @@ remora.Template.smartLoad = function(obj) {
   };
 })();
 
-remora.render = function(text, data) {
-  return remora.Template.smartLoad(text).render(data);
+remora.render = function(text, data, options) {
+  return remora.Template.smartLoad(text, options).render(data);
 };

@@ -27,10 +27,11 @@ syn include @javascriptTop syntax/javascript.vim
 
 " End keywords
 syn keyword remoraEnd contained endfor endwhile endif endtry enddef
+syn keyword remoraElif contained elif
 
 " Block rules
-syn region remoraLine matchgroup=remoraDelim start=#^\s*%# end=#$# keepend contains=@javascriptTop,remoraEnd
-syn region remoraBlock matchgroup=remoraDelim start=#<%!\?# end=#%># keepend contains=@javascriptTop,remoraEnd
+syn region remoraLine matchgroup=remoraDelim start=#^\s*%# end=#$# keepend contains=remoraElif,@javascriptTop,remoraEnd
+syn region remoraBlock matchgroup=remoraDelim start=#<%!\?# end=#%># keepend contains=@javascriptTop
 
 " Variables
 syn region remoraNested start="{" end="}" transparent display contained contains=remoraNested,@javascriptTop
@@ -72,6 +73,7 @@ if version >= 508 || !exists("did_remora_syn_inits")
   HiLink remoraText Normal
   HiLink remoraDelim Preproc
   HiLink remoraEnd Keyword
+  HiLink remoraElif Keyword
   HiLink remoraComment Comment
   HiLink remoraEscape Special
 

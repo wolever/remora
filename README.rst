@@ -49,12 +49,12 @@ Syntax
 ``remora``'s syntax is as close as possible to `Mako's syntax`__, so Mako's
 documentation can be used to fill in the details.
 
-.. __ http://www.makotemplates.org/docs/syntax.html#
+.. __: http://www.makotemplates.org/docs/syntax.html#
 
 Loading
 -------
 
-Loading kind of sucks right now. Sorry. Just copy whatever I do in ``example/index.html``.
+XXX WRITE THIS XXX
 
 In the near future, though, you will be able to load ``remora`` from...
 
@@ -140,7 +140,7 @@ Consider this simple Twitter-like site::
     </div>
 
     <script id="selected-status" type="text/x-remora">
-        % if !status:
+        % if typeof status === "undefined":
             <p>Click a status update to get more details...</p>
             <% return; /* note: '<% .. %>' isn't implemented yet */ %>
         % endif

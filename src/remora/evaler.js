@@ -65,7 +65,7 @@ remora.evaler = (function() {
       // The parens are added around the JS to ensure that it is a simple
       // expression and not an arbitrary block of code. This will make the
       // (potential) future implementaiton of an 'evalAsync' less painful.
-      return eval("(" + js + ")");
+      return eval(evalSync.codeOffsetNewlines + "(" + js + ")");
     } catch (e) {
       e.source = js;
       e.hasIncorrectLineNumbers = true;
@@ -132,6 +132,8 @@ remora.evaler = (function() {
     }
     if (e.lineNumber) {
       evalSync.codeOffsetNewlines = new Array(e.lineNumber + 1).join("\n");
+    } else {
+      evalSync.codeOffsetNewlines = "";
     }
   }
 

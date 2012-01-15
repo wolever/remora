@@ -1,2 +1,14 @@
-- Auto-escaping options
-- Helpful errors when JS expressions inside templates throw errors
+- Finish parser-debug.js
+- Fix parser so it knows about JS expressions
+- Finish build script for the different platforms
+    - Including script that can be hotlinked
+- Make tests run under node
+    - Include node demo
+- Update docs
+    - Quick start
+    - Syntax
+    - Loading
+    - Link to live demo
+- Fancy logo
+- Marketing
+    - Reddit, HN, Twitter

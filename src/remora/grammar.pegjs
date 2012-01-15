@@ -1,35 +1,38 @@
 {
   function computeLocation(pos) {
-    /*
-     * The first idea was to use |String.split| to break the input up to the
-     * error position along newlines and derive the line and column from
-     * there. However IE's |split| implementation is so broken that it was
-     * enough to prevent it.
-     */
+    // Note: this differs slightly from PegJS's 'compute location' function
+    // as it considers newlines to be part of the line, not part of the next
+    // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
+    // '\n') will return `line: 1`, not `line: 2`).
 
     if (pos < 0)
       return { line: -1, column: -1, pos: pos };
-    
+    if (pos > input.length)
+      pos = input.length;
+
     var line = 1;
     var column = 1;
-    var seenCR = false;
-    
-    for (var i = 0; i < pos; i++) {
-      var ch = input.charAt(i);
-      if (ch === '\n') {
-        if (!seenCR) { line++; }
-        column = 1;
-        seenCR = false;
-      } else if (ch === '\r' | ch === '\u2028' || ch === '\u2029') {
-        line++;
-        column = 1;
-        seenCR = true;
-      } else {
-        column++;
-        seenCR = false;
+    var seenNL = false;
+
+    for (var i = 0; i < pos; i += 1) {
+      if (seenNL) {
+        line += 1;
+        column = 0;
+        seenNL = false;
+      }
+      column += 1;
+
+      switch (input.charAt(i)) {
+        case '\r':
+        case '\u2028':
+        case '\u2029':
+          if (i + 1 < pos && input.charAt(i + 1) === '\n')
+            continue;
+        case '\n':
+          seenNL = true;
       }
     }
-    
+
     return { line: line, column: column, pos: pos };
   }
 
@@ -37,7 +40,7 @@
     options = options || {};
     options.type = type;
     if (options.pos === undefined)
-      options.pos = pos;
+      throw Error("Node " + type + " doesn't define a 'pos'!");
     return options;
   }
 
@@ -68,6 +71,7 @@
 
   function DocNode() {
     return Node("doc", {
+      pos: pos,
       children: []
     });
   };
@@ -129,11 +133,13 @@ _doc
 
 markup
 = expression
-/ block_part
+/ control_block
+/ code_block
 
 expression
 = "${" body:exprbody  "}" {
   return Node("expression", {
+    pos: pos - 1,
     expr: body.expr,
     filters: body.filter
   });
@@ -154,15 +160,15 @@ filter
 / "" { return []; }
 
 
-block_part
+control_block
 = line_start line:(_*) "%%" {
   return line.join("") + "%";
 }
-/ line_start _* "%" _? b:_block_part {
+/ line_start _* "%" _? b:_control_block {
   return b;
 }
 
-_block_part
+_control_block
 = block:(
   _block_start /
   _block_mid /
@@ -189,11 +195,14 @@ _block_start
 }
 
 _block_start_body
-= "for" _+ v:var _+ "in" e:_block_expr {
+= "for" _+ v0:var v1:(_* "," _* v:var { return v })? _+ "in" e:_block_expr {
+  var vars  = [v0];
+  if (v1)
+    vars.push(v1);
   return {
     expr: e,
     keyword: "for",
-    vars: [v]
+    vars: vars
   };
 }
 / kw:( "if" / "while" ) e:_block_expr {
@@ -250,8 +259,16 @@ _block_end
   return this_block;
 }
 
+code_block
+= "<%" body:(!"%>" ch:. { return ch })+ "%>" {
+  return Node("codeblock", {
+    pos: pos - 2,
+    body: body.join("")
+  });
+}
+
 var
-= v:[a-zA-Z_0-9]+ { return v.join(""); }
+= v:[a-zA-Z_0-9$]+ { return v.join(""); }
 
 _
 = text:([ \t]) {
@@ -265,5 +282,7 @@ line_start
 
 nl
 = text:(_* "\n") {
-  return text.join("");
+  return text[0].join("") + text[1];
 }
+
+/* vim: set filetype=javascript shiftwidth=2 tabstop=2 softtabstop=2 :*/

@@ -17,11 +17,12 @@ remora.parser = (function(){
         "_block_expr": parse__block_expr,
         "_block_mid": parse__block_mid,
         "_block_mid_body": parse__block_mid_body,
-        "_block_part": parse__block_part,
         "_block_start": parse__block_start,
         "_block_start_body": parse__block_start_body,
+        "_control_block": parse__control_block,
         "_doc": parse__doc,
-        "block_part": parse_block_part,
+        "code_block": parse_code_block,
+        "control_block": parse_control_block,
         "doc": parse_doc,
         "exprbody": parse_exprbody,
         "expression": parse_expression,
@@ -253,15 +254,20 @@ remora.parser = (function(){
         }
         
         
-        var result2 = parse_expression();
-        if (result2 !== null) {
-          var result0 = result2;
+        var result3 = parse_expression();
+        if (result3 !== null) {
+          var result0 = result3;
         } else {
-          var result1 = parse_block_part();
-          if (result1 !== null) {
-            var result0 = result1;
+          var result2 = parse_control_block();
+          if (result2 !== null) {
+            var result0 = result2;
           } else {
-            var result0 = null;;
+            var result1 = parse_code_block();
+            if (result1 !== null) {
+              var result0 = result1;
+            } else {
+              var result0 = null;;
+            };
           };
         }
         
@@ -323,6 +329,7 @@ remora.parser = (function(){
         var result2 = result1 !== null
           ? (function(body) {
             return Node("expression", {
+              pos: pos - 1,
               expr: body.expr,
               filters: body.filter
             });
@@ -519,8 +526,8 @@ remora.parser = (function(){
         return result0;
       }
       
-      function parse_block_part() {
-        var cacheKey = 'block_part@' + pos;
+      function parse_control_block() {
+        var cacheKey = 'control_block@' + pos;
         var cachedResult = cache[cacheKey];
         if (cachedResult) {
           pos = cachedResult.nextPos;
@@ -600,7 +607,7 @@ remora.parser = (function(){
                 var result9 = parse__();
                 var result7 = result9 !== null ? result9 : '';
                 if (result7 !== null) {
-                  var result8 = parse__block_part();
+                  var result8 = parse__control_block();
                   if (result8 !== null) {
                     var result2 = [result4, result5, result6, result7, result8];
                   } else {
@@ -650,8 +657,8 @@ remora.parser = (function(){
         return result0;
       }
       
-      function parse__block_part() {
-        var cacheKey = '_block_part@' + pos;
+      function parse__control_block() {
+        var cacheKey = '_control_block@' + pos;
         var cachedResult = cache[cacheKey];
         if (cachedResult) {
           pos = cachedResult.nextPos;
@@ -829,12 +836,12 @@ remora.parser = (function(){
           }
         }
         if (result11 !== null) {
-          var result18 = parse__();
-          if (result18 !== null) {
+          var result28 = parse__();
+          if (result28 !== null) {
             var result12 = [];
-            while (result18 !== null) {
-              result12.push(result18);
-              var result18 = parse__();
+            while (result28 !== null) {
+              result12.push(result28);
+              var result28 = parse__();
             }
           } else {
             var result12 = null;
@@ -842,30 +849,90 @@ remora.parser = (function(){
           if (result12 !== null) {
             var result13 = parse_var();
             if (result13 !== null) {
-              var result17 = parse__();
-              if (result17 !== null) {
-                var result14 = [];
-                while (result17 !== null) {
-                  result14.push(result17);
-                  var result17 = parse__();
-                }
-              } else {
-                var result14 = null;
+              var savedPos4 = pos;
+              var savedPos5 = pos;
+              var result22 = [];
+              var result27 = parse__();
+              while (result27 !== null) {
+                result22.push(result27);
+                var result27 = parse__();
               }
-              if (result14 !== null) {
-                if (input.substr(pos, 2) === "in") {
-                  var result15 = "in";
-                  pos += 2;
+              if (result22 !== null) {
+                if (input.substr(pos, 1) === ",") {
+                  var result23 = ",";
+                  pos += 1;
                 } else {
-                  var result15 = null;
+                  var result23 = null;
                   if (reportMatchFailures) {
-                    matchFailed("\"in\"");
+                    matchFailed("\",\"");
                   }
                 }
+                if (result23 !== null) {
+                  var result24 = [];
+                  var result26 = parse__();
+                  while (result26 !== null) {
+                    result24.push(result26);
+                    var result26 = parse__();
+                  }
+                  if (result24 !== null) {
+                    var result25 = parse_var();
+                    if (result25 !== null) {
+                      var result20 = [result22, result23, result24, result25];
+                    } else {
+                      var result20 = null;
+                      pos = savedPos5;
+                    }
+                  } else {
+                    var result20 = null;
+                    pos = savedPos5;
+                  }
+                } else {
+                  var result20 = null;
+                  pos = savedPos5;
+                }
+              } else {
+                var result20 = null;
+                pos = savedPos5;
+              }
+              var result21 = result20 !== null
+                ? (function(v) { return v })(result20[3])
+                : null;
+              if (result21 !== null) {
+                var result19 = result21;
+              } else {
+                var result19 = null;
+                pos = savedPos4;
+              }
+              var result14 = result19 !== null ? result19 : '';
+              if (result14 !== null) {
+                var result18 = parse__();
+                if (result18 !== null) {
+                  var result15 = [];
+                  while (result18 !== null) {
+                    result15.push(result18);
+                    var result18 = parse__();
+                  }
+                } else {
+                  var result15 = null;
+                }
                 if (result15 !== null) {
-                  var result16 = parse__block_expr();
+                  if (input.substr(pos, 2) === "in") {
+                    var result16 = "in";
+                    pos += 2;
+                  } else {
+                    var result16 = null;
+                    if (reportMatchFailures) {
+                      matchFailed("\"in\"");
+                    }
+                  }
                   if (result16 !== null) {
-                    var result9 = [result11, result12, result13, result14, result15, result16];
+                    var result17 = parse__block_expr();
+                    if (result17 !== null) {
+                      var result9 = [result11, result12, result13, result14, result15, result16, result17];
+                    } else {
+                      var result9 = null;
+                      pos = savedPos3;
+                    }
                   } else {
                     var result9 = null;
                     pos = savedPos3;
@@ -891,13 +958,16 @@ remora.parser = (function(){
           pos = savedPos3;
         }
         var result10 = result9 !== null
-          ? (function(v, e) {
+          ? (function(v0, v1, e) {
+            var vars  = [v0];
+            if (v1)
+              vars.push(v1);
             return {
               expr: e,
               keyword: "for",
-              vars: [v]
+              vars: vars
             };
-          })(result9[2], result9[5])
+          })(result9[2], result9[3], result9[6])
           : null;
         if (result10 !== null) {
           var result8 = result10;
@@ -1305,6 +1375,183 @@ remora.parser = (function(){
         return result0;
       }
       
+      function parse_code_block() {
+        var cacheKey = 'code_block@' + pos;
+        var cachedResult = cache[cacheKey];
+        if (cachedResult) {
+          pos = cachedResult.nextPos;
+          return cachedResult.result;
+        }
+        
+        
+        var savedPos0 = pos;
+        var savedPos1 = pos;
+        if (input.substr(pos, 2) === "<%") {
+          var result3 = "<%";
+          pos += 2;
+        } else {
+          var result3 = null;
+          if (reportMatchFailures) {
+            matchFailed("\"<%\"");
+          }
+        }
+        if (result3 !== null) {
+          var savedPos2 = pos;
+          var savedPos3 = pos;
+          var savedPos4 = pos;
+          var savedReportMatchFailuresVar0 = reportMatchFailures;
+          reportMatchFailures = false;
+          if (input.substr(pos, 2) === "%>") {
+            var result11 = "%>";
+            pos += 2;
+          } else {
+            var result11 = null;
+            if (reportMatchFailures) {
+              matchFailed("\"%>\"");
+            }
+          }
+          reportMatchFailures = savedReportMatchFailuresVar0;
+          if (result11 === null) {
+            var result9 = '';
+          } else {
+            var result9 = null;
+            pos = savedPos4;
+          }
+          if (result9 !== null) {
+            if (input.length > pos) {
+              var result10 = input.charAt(pos);
+              pos++;
+            } else {
+              var result10 = null;
+              if (reportMatchFailures) {
+                matchFailed('any character');
+              }
+            }
+            if (result10 !== null) {
+              var result7 = [result9, result10];
+            } else {
+              var result7 = null;
+              pos = savedPos3;
+            }
+          } else {
+            var result7 = null;
+            pos = savedPos3;
+          }
+          var result8 = result7 !== null
+            ? (function(ch) { return ch })(result7[1])
+            : null;
+          if (result8 !== null) {
+            var result6 = result8;
+          } else {
+            var result6 = null;
+            pos = savedPos2;
+          }
+          if (result6 !== null) {
+            var result4 = [];
+            while (result6 !== null) {
+              result4.push(result6);
+              var savedPos2 = pos;
+              var savedPos3 = pos;
+              var savedPos4 = pos;
+              var savedReportMatchFailuresVar0 = reportMatchFailures;
+              reportMatchFailures = false;
+              if (input.substr(pos, 2) === "%>") {
+                var result11 = "%>";
+                pos += 2;
+              } else {
+                var result11 = null;
+                if (reportMatchFailures) {
+                  matchFailed("\"%>\"");
+                }
+              }
+              reportMatchFailures = savedReportMatchFailuresVar0;
+              if (result11 === null) {
+                var result9 = '';
+              } else {
+                var result9 = null;
+                pos = savedPos4;
+              }
+              if (result9 !== null) {
+                if (input.length > pos) {
+                  var result10 = input.charAt(pos);
+                  pos++;
+                } else {
+                  var result10 = null;
+                  if (reportMatchFailures) {
+                    matchFailed('any character');
+                  }
+                }
+                if (result10 !== null) {
+                  var result7 = [result9, result10];
+                } else {
+                  var result7 = null;
+                  pos = savedPos3;
+                }
+              } else {
+                var result7 = null;
+                pos = savedPos3;
+              }
+              var result8 = result7 !== null
+                ? (function(ch) { return ch })(result7[1])
+                : null;
+              if (result8 !== null) {
+                var result6 = result8;
+              } else {
+                var result6 = null;
+                pos = savedPos2;
+              }
+            }
+          } else {
+            var result4 = null;
+          }
+          if (result4 !== null) {
+            if (input.substr(pos, 2) === "%>") {
+              var result5 = "%>";
+              pos += 2;
+            } else {
+              var result5 = null;
+              if (reportMatchFailures) {
+                matchFailed("\"%>\"");
+              }
+            }
+            if (result5 !== null) {
+              var result1 = [result3, result4, result5];
+            } else {
+              var result1 = null;
+              pos = savedPos1;
+            }
+          } else {
+            var result1 = null;
+            pos = savedPos1;
+          }
+        } else {
+          var result1 = null;
+          pos = savedPos1;
+        }
+        var result2 = result1 !== null
+          ? (function(body) {
+            return Node("codeblock", {
+              pos: pos - 2,
+              body: body.join("")
+            });
+          })(result1[1])
+          : null;
+        if (result2 !== null) {
+          var result0 = result2;
+        } else {
+          var result0 = null;
+          pos = savedPos0;
+        }
+        
+        
+        
+        cache[cacheKey] = {
+          nextPos: pos,
+          result:  result0
+        };
+        return result0;
+      }
+      
       function parse_var() {
         var cacheKey = 'var@' + pos;
         var cachedResult = cache[cacheKey];
@@ -1315,26 +1562,26 @@ remora.parser = (function(){
         
         
         var savedPos0 = pos;
-        if (input.substr(pos).match(/^[a-zA-Z_0-9]/) !== null) {
+        if (input.substr(pos).match(/^[a-zA-Z_0-9$]/) !== null) {
           var result3 = input.charAt(pos);
           pos++;
         } else {
           var result3 = null;
           if (reportMatchFailures) {
-            matchFailed("[a-zA-Z_0-9]");
+            matchFailed("[a-zA-Z_0-9$]");
           }
         }
         if (result3 !== null) {
           var result1 = [];
           while (result3 !== null) {
             result1.push(result3);
-            if (input.substr(pos).match(/^[a-zA-Z_0-9]/) !== null) {
+            if (input.substr(pos).match(/^[a-zA-Z_0-9$]/) !== null) {
               var result3 = input.charAt(pos);
               pos++;
             } else {
               var result3 = null;
               if (reportMatchFailures) {
-                matchFailed("[a-zA-Z_0-9]");
+                matchFailed("[a-zA-Z_0-9$]");
               }
             }
           }
@@ -1461,7 +1708,7 @@ remora.parser = (function(){
         }
         var result2 = result1 !== null
           ? (function(text) {
-            return text.join("");
+            return text[0].join("") + text[1];
           })(result1)
           : null;
         if (result2 !== null) {
@@ -1549,17 +1796,13 @@ remora.parser = (function(){
       
     function computeLocation(pos) {
       
-      /*
+      // Note: this differs slightly from PegJS's 'compute location' function
       
-       * The first idea was to use |String.split| to break the input up to the
+      // as it considers newlines to be part of the line, not part of the next
       
-       * error position along newlines and derive the line and column from
+      // line (ex, if the input is "a\nb", then `computeLocation(1)` (ie, the
       
-       * there. However IE's |split| implementation is so broken that it was
-      
-       * enough to prevent it.
-      
-       */
+      // '\n') will return `line: 1`, not `line: 2`).
       
   
       
@@ -1567,47 +1810,57 @@ remora.parser = (function(){
       
         return { line: -1, column: -1, pos: pos };
       
+      if (pos > input.length)
       
+        pos = input.length;
+      
+  
       
       var line = 1;
       
       var column = 1;
       
-      var seenCR = false;
+      var seenNL = false;
       
+  
       
+      for (var i = 0; i < pos; i += 1) {
       
-      for (var i = 0; i < pos; i++) {
+        if (seenNL) {
       
-        var ch = input.charAt(i);
+          line += 1;
       
-        if (ch === '\n') {
+          column = 0;
       
-          if (!seenCR) { line++; }
+          seenNL = false;
       
-          column = 1;
+        }
       
-          seenCR = false;
+        column += 1;
       
-        } else if (ch === '\r' | ch === '\u2028' || ch === '\u2029') {
+  
       
-          line++;
+        switch (input.charAt(i)) {
       
-          column = 1;
+          case '\r':
       
-          seenCR = true;
+          case '\u2028':
       
-        } else {
+          case '\u2029':
       
-          column++;
+            if (i + 1 < pos && input.charAt(i + 1) === '\n')
       
-          seenCR = false;
+              continue;
+      
+          case '\n':
+      
+            seenNL = true;
       
         }
       
       }
       
-      
+  
       
       return { line: line, column: column, pos: pos };
       
@@ -1623,7 +1876,7 @@ remora.parser = (function(){
       
       if (options.pos === undefined)
       
-        options.pos = pos;
+        throw Error("Node " + type + " doesn't define a 'pos'!");
       
       return options;
       
@@ -1684,6 +1937,8 @@ remora.parser = (function(){
     function DocNode() {
       
       return Node("doc", {
+      
+        pos: pos,
       
         children: []
       
