@@ -28,10 +28,8 @@ build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	cat ${ORDERED_JS} >> $@
 
 build/devpkg.js: build/package_base.js
-	$(eval TARGET := build/remora-${DEV_VERSION}.js)
 	echo 'var REMORA_VERSION = "${DEV_VERSION}";' > build/devpkg.js
 	cat $^ >> build/devpkg.js
-	ln -f build/devpkg.js ${TARGET}
 
 devpkg: build/devpkg.js
 
