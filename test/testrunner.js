@@ -3,7 +3,7 @@
 var runner = require("qunit");
 
 runner.run({
-  code: "../src/node/remora.dev.js",
+  code: "./_nodeQUnitCompat.js",
   tests: [
     "./test_core.js",
     "./test_evaler.js",
