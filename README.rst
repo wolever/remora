@@ -20,8 +20,8 @@ not-entirely-terrible generated JavaScript and even some rendered HTML!
 Status
 ------
 
-Very, very alpha. No, seriously, it would be a horrible idea to even think
-about using ``remora`` right now.
+Sort of alpha! It's being used in a real (but internal) project and is under
+active development.
 
 
 Less broken?
@@ -169,7 +169,7 @@ In the near future, though, you will be able to load ``remora`` from...
 * A CommonJS-compatible runtime: ``var remora = require("remora");``
 * AMD loader such as ``require.js``: ``require(["remora"], function(remora) {
   ... });``
-* Google closure: ``goog.require("remora")``
+* Google Closure: ``goog.require("remora")``
 * A ``<script />`` tag: ``<script src="remora-x.x.x-min.js"></script>``
 
 Currently the three best ways to get using ``remora``:
