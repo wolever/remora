@@ -270,7 +270,7 @@ Consider this simple Twitter-like site::
     <script id="selected-status" type="text/x-remora">
         % if typeof status === "undefined":
             <p>Click a status update to get more details...</p>
-            <% return; /* note: '<% .. %>' isn't implemented yet */ %>
+            <% return; %>
         % endif
         <img src="${status.author_icon_large}" />
         <p>${status.text}</p>
