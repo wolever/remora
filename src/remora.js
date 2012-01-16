@@ -15,6 +15,9 @@ remora.RenderContext = function(options) {
   }, options);
 
   self.filter = function(filterName, text) {
+    if (text === undefined)
+      return undefined;
+
     if (filterName === "n")
       return text;
 
@@ -31,7 +34,9 @@ remora.RenderContext = function(options) {
     return func(text);
   };
 
-  self.write = function(text) {
+  self.write = function(text, ignoreUndefined) {
+    if (ignoreUndefined && text === undefined)
+      return;
     self.buffer.push(text);
   };
 

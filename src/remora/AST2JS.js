@@ -104,7 +104,7 @@ remora.AST2JS = function() {
       filter_closeparens += ")";
     }
     self.emit("(" + node.expr + ")");
-    self.emit(filter_closeparens + ");\n");
+    self.emit(filter_closeparens + ", true);\n");
   };
 
   self._curUniqueVar = 0;
