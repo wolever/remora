@@ -316,6 +316,30 @@ var testcases = [
     expected_renders: [
       { __expected: "foo" }
     ]
+  },
+
+  {
+    name: "undefined should be empty string in expressions",
+    input: "x${undefined}y",
+    expected_renders: [
+      { __expected: "xy" }
+    ]
+  },
+
+  {
+    name: "undefined should be empty string in expressions with no filters",
+    input: "x${undefined|n}y",
+    expected_renders: [
+      { __expected: "xy" }
+    ]
+  },
+
+  {
+    name: "undefined should be empty string in expressions with filters",
+    input: "x${undefined|h}y",
+    expected_renders: [
+      { __expected: "xy" }
+    ]
   }
 
 ];
@@ -330,6 +354,8 @@ var runTests = function() {
 
 QUnit.module("parser");
 testcases.forEach(function(testcase) {
+  if (!testcase.expected_ast)
+    return;
   test(testcase.name, function() {
     var actual = parser.parse(testcase.input);
     equal(actual.type, "doc");
