@@ -21,6 +21,7 @@ clean:
 	rm -f src/browser/deps.js
 	rm -f src/remora/parser.js
 	rm -f build/*
+	rm -f test/testrunner-*
 
 build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	mkdir build 2> /dev/null || true
@@ -32,19 +33,19 @@ devpkg: build/devpkg.js
 build/devpkg.js: build/package_base.js
 	ln -f $< $@
 
-node_pkg: build/node_pkg.js
-build/node_pkg.js: build/package_base.js
+node_minpkg: build/node_minpkg.js
+build/node_minpkg.js: build/package_base.js
 	cp $< $@.tmp
 	echo "remora.__goog = goog;" >> $@.tmp
 	echo "module.exports = remora" >> $@.tmp
 	closure $@.tmp > $@
 	rm $@.tmp
 
-testrunners: devpkg node_pkg
+testrunners: devpkg node_minpkg
 	./test/build_testrunners.js
 
 test: testrunners
-	echo "Run tests by opening or executing the testrunner-* files in test/"
+	echo "Run tests by opening or executing the testrunner-* files in test/, or running './test/test_all'"
 
 gh-page:
 	hg co gh-pages

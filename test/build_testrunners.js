@@ -32,9 +32,9 @@ var testrunners = {
     template: "testrunners/testrunner.js",
     code: "../src/node/remora.dev.js",
   },
-  "testrunner-node_pkg.js": {
+  "testrunner-node_minpkg.js": {
     template: "testrunners/testrunner.js",
-    code: "../build/node_pkg.js",
+    code: "../build/node_minpkg.js",
   },
 };
 

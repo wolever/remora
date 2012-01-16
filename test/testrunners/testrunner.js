@@ -16,5 +16,8 @@ if (process.env.LOAD_TESTS) {
         "./test_evaler.js",
         "./test_transforms.js",
     ]
+  }, function(summary) {
+    if (summary.failed > 0)
+      process.exit(1);
   });
 }
