@@ -1,0 +1,19 @@
+#!/bin/bash
+
+IFS="`printf "\n\t"`"
+set -eu
+cd "`dirname "$0"`"
+
+for runner in testrunner-*; do
+    if [[ -x "$runner" ]]; then
+        ./$runner
+    elif [[ "$runner" =~ .html$ ]]; then
+        open "$runner"
+    else
+        echo "don't know how to deal with '$runner'"
+        exit 1
+    fi
+done
+
+echo
+echo "All executable tests passed. Manually verify browser tests."

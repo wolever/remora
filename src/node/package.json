@@ -1,19 +1,13 @@
 {
     "name": "remora",
     "description": "A less insane templating language",
-    "version": "0.1",
+    "version": "$VERSION",
     "author": "David Wolever <david@wolever.net>",
     "repository": {
         "type": "git",
         "url": "http: //github.com/wolever/remora.git"
     },
     "keywords": ["templating", "template"],
-   "dependencies": {
-       "pegjs": "== 0.6.2",
-    },
-    "devDependencies": {
-        "qunit": "== 0.2.9"
-    },
     "licenses": [
         {
            "type": "MIT",

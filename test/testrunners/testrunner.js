@@ -1,12 +1,23 @@
 #!/usr/bin/env node
 
-var runner = require("qunit");
+process.chdir(__dirname);
 
-runner.run({
-  code: "${code}",
-  tests: [
-    % for testScript in testScripts:
-      "./${testScript}",
-    % endfor
-  ]
-});
+if (process.env.LOAD_TESTS) {
+  var remora = require("${code}");
+  GLOBAL.remora = remora;
+
+} else {
+  var runner = require("qunit");
+  process.env.LOAD_TESTS = true;
+  runner.run({
+    code: __filename,
+    tests: [
+        "./test_core.js",
+        "./test_evaler.js",
+        "./test_transforms.js",
+    ]
+  }, function(summary) {
+    if (summary.failed > 0)
+      process.exit(1);
+  });
+}

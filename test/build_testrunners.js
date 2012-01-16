@@ -3,6 +3,8 @@
 process.chdir(__dirname);
 
 var fs = require("fs");
+var exec = require('child_process').exec;
+
 var remora = require("../src/node/remora.dev.js");
 
 var testScripts = [
@@ -30,18 +32,24 @@ var testrunners = {
     template: "testrunners/testrunner.js",
     code: "../src/node/remora.dev.js",
   },
+  "testrunner-node_minpkg.js": {
+    template: "testrunners/testrunner.js",
+    code: "../build/node_minpkg.js",
+  },
 };
 
-for (var runnerFile in testrunners) {
-  if (!(testrunners.hasOwnProperty(runnerFile)))
-    continue;
-  var runnerData = testrunners[runnerFile];
-  runnerData.testScripts = testScripts;
-  var runnerTemplateStr = fs.readFileSync(runnerData.template, "utf-8");
-  fs.writeFileSync(runnerFile, remora.render(runnerTemplateStr, runnerData, {
-    defaultFilters: [],
-  }));
-  var stat = fs.statSync(runnerData.template);
-  fs.chmodSync(runnerFile, stat.mode);
-  console.log("wrote " + runnerFile);
-};
+exec("rm testrunner-*").on("exit", function() {
+  for (var runnerFile in testrunners) {
+    if (!(testrunners.hasOwnProperty(runnerFile)))
+      continue;
+    var runnerData = testrunners[runnerFile];
+    runnerData.testScripts = testScripts;
+    var runnerTemplateStr = fs.readFileSync(runnerData.template, "utf-8");
+    fs.writeFileSync(runnerFile, remora.render(runnerTemplateStr, runnerData, {
+      defaultFilters: [],
+    }));
+    var stat = fs.statSync(runnerData.template);
+    fs.chmodSync(runnerFile, stat.mode);
+    console.log("wrote " + runnerFile);
+  }
+});
