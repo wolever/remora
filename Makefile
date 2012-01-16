@@ -24,16 +24,23 @@ clean:
 
 build/package_base.js: src/remora/parser.js src/browser/deps.js ${ALL_FILES}
 	mkdir build 2> /dev/null || true
-	echo "CLOSURE_NO_DEPS = true;" > $@
+	echo 'var REMORA_VERSION = "${DEV_VERSION}";' > $@
+	echo 'var CLOSURE_NO_DEPS = true;' >> $@
 	cat ${ORDERED_JS} >> $@
 
-build/devpkg.js: build/package_base.js
-	echo 'var REMORA_VERSION = "${DEV_VERSION}";' > build/devpkg.js
-	cat $^ >> build/devpkg.js
-
 devpkg: build/devpkg.js
+build/devpkg.js: build/package_base.js
+	ln -f $< $@
 
-testrunners: devpkg
+node_pkg: build/node_pkg.js
+build/node_pkg.js: build/package_base.js
+	cp $< $@.tmp
+	echo "remora.__goog = goog;" >> $@.tmp
+	echo "module.exports = remora" >> $@.tmp
+	closure $@.tmp > $@
+	rm $@.tmp
+
+testrunners: devpkg node_pkg
 	./test/build_testrunners.js
 
 test: testrunners
