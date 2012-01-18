@@ -1,5 +1,11 @@
 goog.provide("remora.log");
 
+// Define 'remora.log' to make sure that accidental calls to
+// 'remora.log("stuff")' are safe.
+remora.log = function() {
+  remora.log.log.apply(this, arguments);
+};
+
 remora.log._log = (function() {
   var console = goog.global.console;
   if (!console)

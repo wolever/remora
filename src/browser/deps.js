@@ -3,7 +3,7 @@
 goog.addDependency('../browser/base.js', ['goog'], []);
 goog.addDependency('../remora.js', ['remora'], ['remora.AST2JS', 'remora.ASTTransforms', 'remora.evaler', 'remora.log', 'remora.parser', 'remora.utils']);
 goog.addDependency('../remora/AST2JS.js', ['remora.AST2JS'], ['remora.ASTWalker']);
-goog.addDependency('../remora/ASTTransforms.js', ['remora.ASTTransforms'], ['remora.ASTWalker']);
+goog.addDependency('../remora/ASTTransforms.js', ['remora.ASTTransforms'], ['remora.ASTWalker', 'remora.log']);
 goog.addDependency('../remora/ASTWalker.js', ['remora.ASTWalker'], []);
 goog.addDependency('../remora/evaler.js', ['remora.evaler'], []);
 goog.addDependency('../remora/log.js', ['remora.log'], []);

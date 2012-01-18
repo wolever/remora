@@ -8,7 +8,7 @@ var exec = require('child_process').exec;
 var remora = require("../src/node/remora.dev.js");
 
 var testScripts = [
-  "test_setup.js",
+  "test_log.js",
   "test_core.js",
   "test_evaler.js",
   "test_transforms.js",
