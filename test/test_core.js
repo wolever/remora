@@ -319,6 +319,32 @@ var testcases = [
   },
 
   {
+    name: "code block with function that emits content",
+    input: [
+      "<% var foo = function() { %>",
+      "  bar: ${bar}",
+      "<% } %>",
+      "called: ${foo()}",
+    ].join("\n"),
+    expected_renders: [
+      { bar: 42,
+        __expected: "\ncalled: \n  bar: 42\n",
+      }
+    ]
+  },
+
+  {
+    name: "code block with function declarations issues warning",
+    input: [
+      "<% function blah() { %>",
+      "<% } %>",
+    ].join("\n"),
+    expected_renders: [
+      { __logMessages: [{ text: /warn:.*function declarations \('function blah/ }] },
+    ]
+  },
+
+  {
     name: "undefined should be empty string in expressions",
     input: "x${undefined}y",
     expected_renders: [
@@ -340,7 +366,7 @@ var testcases = [
     expected_renders: [
       { __expected: "xy" }
     ]
-  }
+  },
 
 ];
 
@@ -373,7 +399,17 @@ testcases.forEach(function(testcase) {
         "defaultFilters": []
       });
       var actual = template.render(expected_render);
-      equal(actual, expected_render.__expected);
+      if (expected_render.__expected !== undefined)
+        equal(actual, expected_render.__expected);
+      (expected_render.__logMessages || []).forEach(function(expected) {
+        var found = false;
+        goog.global.logMessages.forEach(function(msg) {
+          var text = msg.level + ": " + msg.args.join(" ");
+          if (text.search(expected.text) >= 0)
+            found = true;
+        });
+        ok(found, expected.text + " was not found in any log messages");
+      });
     });
   });
 });

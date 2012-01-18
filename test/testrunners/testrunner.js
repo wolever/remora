@@ -5,6 +5,8 @@ process.chdir(__dirname);
 if (process.env.LOAD_TESTS) {
   var remora = require("${code}");
   GLOBAL.remora = remora;
+  GLOBAL.goog = remora.__goog;
+  require("./setup.js");
 
 } else {
   var runner = require("qunit");

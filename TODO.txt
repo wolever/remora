@@ -1,3 +1,5 @@
+- Add warning when defining functions inside templates using `function foo`
+  syntax.
 - Finish parser-debug.js
 - Fix parser so it knows about JS expressions
 - Finish build script for the different platforms

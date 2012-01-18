@@ -3,6 +3,7 @@ goog.require("remora.parser");
 goog.require("remora.AST2JS");
 goog.require("remora.ASTTransforms");
 goog.require("remora.evaler");
+goog.require("remora.log");
 
 goog.provide("remora");
 
@@ -117,6 +118,7 @@ remora.Template = function(text, options) {
           e.message
         );
       }
+      remora.log.error("error evaluating template:", e);
       throw e;
     }
   };
@@ -138,6 +140,7 @@ remora.Template = function(text, options) {
         e.message = "in remora template: " + e.message;
       }
       e.message += " (see global __render_error)";
+      remora.log.error("error rendering template:", e);
       throw e;
     }
 
