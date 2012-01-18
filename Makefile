@@ -56,3 +56,6 @@ gh-page:
 	hg ci -m "Merge master -> gh-pages"
 	hg co master
 	hg push
+
+serve:
+	python -m SimpleHTTPServer 3445
