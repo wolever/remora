@@ -449,7 +449,7 @@ line_error_testcases.forEach(function(testcase) {
 
 QUnit.module("remora.render");
 
-test("doesn't crash on null", function() {
+test("doesn't crash on null template", function() {
   var rendered = remora.render(null, {});
   equal(rendered, "null");
 });
@@ -478,3 +478,43 @@ if (typeof document !== "undefined") {
     equal(rendered, "&amp; 42 <div>");
   });
 };
+
+QUnit.module("remora.RenderContext.filter");
+
+var filterTestCases = [
+  {
+    name: "JSON string",
+    input: "foo",
+    filter: "json",
+    expected: '"foo"'
+  },
+
+  {
+    name: "JSON undefined",
+    input: undefined,
+    filter: "json",
+    expected: undefined
+  },
+
+  {
+    name: "JSON number",
+    input: 42,
+    filter: "json",
+    expected: "42"
+  },
+
+  {
+    name: "HTML",
+    input: "<>&'\"",
+    filter: "h",
+    expected: "&lt;&gt;&amp;&#39;&#34;"
+  }
+
+];
+
+filterTestCases.forEach(function(testcase) {
+  test(testcase.name, function() {
+    var c = remora.RenderContext();
+    equal(c.filter(testcase.filter, testcase.input), testcase.expected);
+  });
+});

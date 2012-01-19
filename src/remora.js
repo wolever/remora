@@ -16,11 +16,14 @@ remora.RenderContext = function(options) {
   }, options);
 
   self.filter = function(filterName, text) {
+    if (filterName === "n")
+      return text;
+
     if (text === undefined)
       return undefined;
 
-    if (filterName === "n")
-      return text;
+    if (filterName == "json")
+      return JSON.stringify(text);
 
     var func = remora.RenderContext.builtinFilters[filterName];
     if (!func)

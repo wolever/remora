@@ -45,7 +45,7 @@ testrunners: devpkg node_minpkg
 	./test/build_testrunners.js
 
 test: testrunners
-	echo "Run tests by opening or executing the testrunner-* files in test/, or running './test/test_all'"
+	./test/test_all
 
 gh-page:
 	hg co gh-pages

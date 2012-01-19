@@ -17,7 +17,7 @@ QUnit.testStart = function() {
 var old_testDone = QUnit.testDone;
 QUnit.testDone = function(opts) {
   if (opts.failed > 0) {
-    console.error("FAIL:", opts.name);
+    console.error("FAIL:", QUnit.config.current.module + ":", opts.name);
     if (goog.global.logMessages.length > 0) {
       console.log("--- captured log messages ---");
       for (var i = 0; i < goog.global.logMessages.length; i += 1) {
