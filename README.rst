@@ -259,7 +259,7 @@ Consider this simple Twitter-like site::
 
     <div id="status-updates">
         <script id="status-template" type="text/x-remora">
-            <div id="status-${status.id}" class="status-update">
+            <div id="status-${status.id}" class="status-update" data-status-id="${status.id}">
                 <img src="${status.author_icon_small}" />
                 <p>${status.text}</p>
                 <p>Posted ${status.posted_time_delta}</p>
@@ -282,18 +282,18 @@ Consider this simple Twitter-like site::
 
 The jQuery plugin could be used like this::
 
+    var statuses = {};
     var statusTemplate = $("#status-template").remora("template");
-    $.getJSON("/status-updates", function(statuses) {
+    $.getJSON("/api/status-updates", function(value) {
+        statuses = value;
         var newStatusesHTML = $.map(statuses, statusTemplate.render);
         $("#status-updates").html(newStatusesHTML.join("\n"));
-        $.each(statuses, function(status) {
-            $(document.getElementBtId(status.id)).data("status", status);
-        });
     });
 
     $("#selected-status").remora("render", null);
     $("#status-updates").on("click", ".status-update", function(event) {
-        $("#selected-status").remora("render", $(this).data("status"));
+        var status = statuses[$(this).data("status-id")];
+        $("#selected-status").remora("render", status);
     });
 
 
