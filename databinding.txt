@@ -1,0 +1,48 @@
+It is my hope to eventually add HTML data binding to remora. These are some
+thoughts on the subject.
+
+
+- At some point, the un-rendered template would be parsed as HTML. This would
+  (for the sake of sanity) be a very strict subset of HTML (ex, all attributes
+  would need to be quoted, that kind of thing).
+
+    - I'm not sure if that should be done during remora's parsing (ie, so
+      remora's grammar would know both about remora's tags and HTML tags), or
+      after remora has created its internal parse tree.
+
+- Each remora expression would have a reference to the HTML context it is being
+  used in. For example::
+
+    <div>Hello, ${name}$</div>
+
+  The ``${name}`` expression would know that it is the child of a text block
+  that is the ``innerHTML`` of the ``<div />``.
+
+  Or in::
+
+    <input ${disabled? "disabled" : ""}>
+
+  The ``${disabled ...}`` expression would know that it's being used to define
+  attributes of the ``<input />`` tag.
+
+- At render time, the expressions would be evaluated, and the appropriate DOM
+  methods would be called. Ex, in the first example above, something like
+  ``div.innerHTML = "Hello, " + (name);`` would be executed, and in the second
+  example above, the attributes would be parsed, and calls to
+  ``input.setAttribute(...)`` and ``input.removeAttribute(...)`` would be
+  issued.
+
+- I still haven't thought much about how the binding updates should be
+  triggered... But given that:
+
+    - Each expression will have a reference to (hence the ability to update
+      the) DOM node it is used in
+    - It will be possible to list all the binding expressions used in a
+      template
+
+  I believe it should be fairly straight forward to update bindings, either
+  by reacting to events issued by expression values (ex, imagine that
+  ``${person.name}`` also issues a call to ``person.bind("change", ...)`` and
+  re-renders its self each time it detects a "name change" event), or by
+  evaluating all expressions and only issuing updates if the value of the
+  expression is different from the old value.
