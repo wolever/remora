@@ -2,6 +2,9 @@ It is my hope to eventually add HTML data binding to remora. These are some
 thoughts on the subject.
 
 
+Fully general bindings
+======================
+
 - At some point, the un-rendered template would be parsed as HTML. This would
   (for the sake of sanity) be a very strict subset of HTML (ex, all attributes
   would need to be quoted, that kind of thing).
@@ -46,3 +49,101 @@ thoughts on the subject.
   re-renders its self each time it detects a "name change" event), or by
   evaluating all expressions and only issuing updates if the value of the
   expression is different from the old value.
+
+- Possibly the expressions to be updated could be figured out automatically by
+  walking over each expression, parsing the contents and building a list of
+  variables it accesses.
+
+    - Actually this static analysis would be much easier (necessary?) to
+      perform on the generated JavaScript. Ex, consider the template::
+
+        <script type="text/x-remora">
+            <% function foo(fooArg) { %>
+                ${fooArg + globalVar}
+            <% } %>
+            ${foo(fooInput)}
+        </script>
+
+      It would be necessary to determine that the value of ``${foo(fooInput)}``
+      depends on both ``fooInput`` and ``globalVar``.
+
+- I have a feeling that doing loops efficiently (or at all?) will not be
+  entirely straight forward... For example::
+
+    <script type="text/x-remora">
+        <ul>
+            % for item in items:
+                <li>${item.name}</li>
+            % endfor
+        </ul>
+    </script>
+    
+    - How do we figure out which item(s) need to be updated? Maybe the
+      algorithm is something like::
+
+        for item in new_items:
+            if item in old_items:
+                ensure that item is at the correct location
+            else:
+                insert the item at the correct location
+        remote old items which don't exist in new items
+
+    - This will be frustrated by the fact that JavaScript doesn't have any
+      method for hashing based on identity...
+
+        - Possibly something really terrible like:
+
+            try:
+                for item in old_items:
+                    item.__uuid = uuid()
+                ... use item.__uuid as a hash key ...
+            finally:
+                for item in old_items:
+                delete item.__uuid
+
+
+More limited (but easier to understand and implement?)
+======================================================
+
+- After some thought, I think this is a bad idea:
+
+    - It's not clear how adding items would work (ex, what happens when you
+      want to add a new tweet?)
+    - It requires manually specifying which regions should be updated when the
+      context data are updated.
+    - It's not obvious that this will be significantly easier to implement.
+
+- Possible simplification: designate "bindable regions". Possibly something
+  like::
+
+    <script type="text/x-remora" id="twitter">
+        <div class="tweets">
+            % for tweet in tweets:
+                <%region tag="div" id="tweet-${tweet.id}" class="tweet">
+                    ${tweet.text}
+                </%region>
+            % endfor
+        </div>
+
+        <%region tag="div" id="selected-tweet" class="selected-tweet">
+            % if selectedTweet:
+                <p>${selectedTweet.text}</p>
+                <p>By: ${selectedTweet.author}</p>
+            % else:
+                <p>Select a tweet...</p>
+            % endif
+        </%region>
+    </script>
+
+  Which could be used something like::
+
+    > var template = remora.prepare($("#twitter"));
+    > var tweetData = {...};
+    > template.setData(tweetData);
+    > template.elements
+    [<div class="tweets">...</div>]
+    > tweetData.selectedTweet = tweetData.tweets[0];
+    > rendered.updateRegion("selected-tweet")
+
+- This look an awful lot like having some <%def %>s which can be called
+  "standalone".
