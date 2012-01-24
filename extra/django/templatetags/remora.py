@@ -39,4 +39,4 @@ class RemoraNode(template.Node):
             self.nodelist.render(context),
             "</script>",
         ])
-            
+
