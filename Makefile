@@ -41,6 +41,12 @@ build/node_minpkg.js: build/package_base.js
 	closure $@.tmp > $@
 	rm $@.tmp
 
+browser_minpkg: build/browser_minpkg.js
+build/browser_minpkg.js: build/package_base.js
+	cp $< $@.tmp
+	closure $@.tmp > $@
+	rm $@.tmp
+
 testrunners: devpkg node_minpkg
 	./test/build_testrunners.js
 

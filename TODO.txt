@@ -1,3 +1,5 @@
+- Document make browser_minpkg
+- Create a <%script> which can be used in place of <script>
 - Add warning when defining functions inside templates using `function foo`
   syntax.
 - Finish parser-debug.js
